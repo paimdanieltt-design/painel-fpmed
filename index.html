@@ -113,6 +113,7 @@ section.blk:first-child{margin-top:0}
 /* informes */
 .inf-list{display:grid;gap:12px}
 .inf{display:grid;grid-template-columns:96px minmax(0,1fr);gap:18px;align-items:start}
+.card.click.inf{display:grid}
 .inf .date{background:var(--surface-2);border-radius:10px;padding:10px 8px;text-align:center;line-height:1.1}
 .inf .date b{display:block;font-size:26px;font-weight:800;color:var(--brand)}
 .inf .date span{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
@@ -268,31 +269,20 @@ body{margin:0}[hidden]{display:none!important}img{max-width:100%}
   </div>
   <main class="wrap">
     <section class="blk">
-      <div class="sec-h"><h2>Esta semana</h2><span class="sub">Agenda publicada</span></div>
-      <article class="card" id="home-atual"></article>
-    </section>
-
-    <section class="blk">
-      <div class="sec-h"><h2>Semana de 12 a 16 de outubro de 2026</h2><button class="link" data-go="agendas" data-semana="2026-10-12">Ver agenda completa →</button></div>
+      <div class="sec-h"><h2 id="h-week"></h2><button class="link" id="h-week-link" type="button">Ver agenda completa →</button></div>
+      <article class="card" id="home-atual" style="margin-bottom:14px"></article>
       <div class="week" id="home-week"></div>
-      <div class="legend">
-        <span><i class="dot ok"></i>Aprovado</span><span><i class="dot info"></i>Realizado ou em andamento</span><span><i class="dot ret"></i>Cancelado ou retirado de pauta</span>
-      </div>
+      <div class="legend" id="home-legend"></div>
     </section>
 
-    <section class="blk">
-      <div class="sec-h"><h2>Destaques da agenda</h2><span class="sub">Resultados da síntese da semana</span></div>
+    <section class="blk" id="sec-destaques">
+      <div class="sec-h"><h2>Destaques da síntese</h2><span class="sub" id="home-dest-sub"></span></div>
       <div class="dest" id="home-dest"></div>
     </section>
 
-    <section class="blk">
-      <div class="sec-h"><h2>A semana em números</h2><span class="sub">Fonte: Síntese FPMed, 12 a 16 de outubro</span></div>
-      <div class="stats">
-        <div class="stat"><b>10</b><span>proposições monitoradas na semana</span></div>
-        <div class="stat"><b>2</b><span>Emendas Constitucionais promulgadas (nºs 140 e 141/2026)</span></div>
-        <div class="stat"><b>75 × 1</b><span>votos na aprovação da PEC 221/2019 em segundo turno no Senado</span></div>
-        <div class="stat"><b>18 de 27</b><span>assinaturas reunidas para a Emenda nº 60 (Polícias Científicas)</span></div>
-      </div>
+    <section class="blk" id="sec-numeros">
+      <div class="sec-h"><h2>A semana em números</h2><span class="sub" id="home-num-sub"></span></div>
+      <div class="stats" id="home-stats"></div>
     </section>
 
     <section class="blk">
@@ -416,6 +406,13 @@ const SEMANAS = [{
       'A agenda também acompanha a PEC nº 18/2025 (Polícias Científicas), três projetos na Comissão de Finanças e Tributação da Câmara e as discussões sobre a PEC nº 221/2019, da jornada de trabalho.'
     ]},
   sintese:{
+    destaques:[
+      {t:'ENAMED: MP 1370/2026 aprovada no Congresso', p:'A Comissão Mista aprovou o relatório do deputado Doutor Luizinho, na forma do PLV 14/2026, que seguiu à sanção presidencial.', st:'ok', meta:'Quinta, 15/10 · Congresso Nacional'},
+      {t:'Sessão Especial em homenagem ao Dia do Médico', p:'Iniciativa do presidente da FPMed, senador Dr. Hiran, no Plenário do Senado, com entidades médicas e o IBDM.', st:'info', meta:'Quarta, 14/10 · Senado Federal'},
+      {t:'PEC 221/2019 vira Emenda Constitucional nº 141/2026', p:'Aprovada em segundo turno por 75 votos a 1 e promulgada na sexta, reduz a jornada semanal sem redução salarial.', st:'ok', meta:'Quarta, 14/10 e sexta, 16/10 · Senado Federal'},
+      {t:'PEC 18/2025: Polícias Científicas', p:'A CCJ aprovou o parecer. A PEC saiu da pauta do Plenário, e a Emenda nº 60 do senador Dr. Hiran soma 18 de 27 assinaturas.', st:'ok', meta:'Quarta, 14/10 · CCJ do Senado'}
+    ],
+    numeros:[['10','proposições monitoradas na semana'],['2','Emendas Constitucionais promulgadas (nºs 140 e 141/2026)'],['75 × 1','votos na aprovação da PEC 221/2019 em segundo turno no Senado'],['18 de 27','assinaturas reunidas para a Emenda nº 60 (Polícias Científicas)']],
     contagem:[['10','proposições para monitoramento'],['7','na Câmara dos Deputados'],['3','no Senado Federal'],['1','na Comissão Mista do Congresso']],
     eventos:'Sessão Especial do Dia do Médico (quarta, 14/10) e Sessão Solene de Promulgação das Emendas Constitucionais nºs 140 e 141/2026 (sexta, 16/10), ambas no Plenário do Senado.',
     resumo:[
@@ -451,6 +448,8 @@ const SEMANAS = [{
     ]}
   ]
 }];
+
+SEMANAS.sort((a,b)=>b.id.localeCompare(a.id));
 
 const INFORMES = [
   {id:'pl3026', data:'2026-10-21', casa:'camara', tema:'Trabalho e emprego', pdf:'docs/informe-pl-3026-2026.pdf',
@@ -608,27 +607,39 @@ function renderAgenda(){
 
 /* ---------- início ---------- */
 function renderHome(){
-  const atual = SEMANAS[0], s = SEMANAS.find(x=>x.sintese);
-  $('#home-atual').innerHTML = `<div class="tag casa">Agenda · ${atual.titulo}</div><h3>${atual.previa.contagem[0][0]==='0'?'Sem itens de interesse em pauta':'Pauta da semana'}</h3><p class="t">${atual.previa.resumo[0]}</p><div class="foot">${pill('neutral','Síntese em breve')}<button class="link" data-go="agendas" data-semana="${atual.id}">Abrir a agenda →</button></div>`;
-  $('#home-week').innerHTML = s.dias.map(dia=>{
-    const itens = dia.itens.filter(it=>visivel(it,'sintese'));
-    const lab = dia.feriado ? 'Feriado nacional' : dia.rotulo;
-    return `<button type="button" class="day ${dia.feriado?'off':''}" data-go="agendas" data-semana="${s.id}" data-dia="${dia.id}" aria-label="${dia.nome}, ${dia.data}: ${lab}">
+  /* Tudo aqui vem dos dados: a semana mais recente de SEMANAS (ordenadas por id) aparece sozinha. */
+  const atual = SEMANAS[0], sin = SEMANAS.find(x=>x.sintese);
+  const modo = atual.sintese ? 'sintese' : 'previa', doc = atual.sintese || atual.previa;
+  $('#h-week').textContent = `Semana de ${atual.titulo}`;
+  $('#h-week-link').onclick = () => { state.semana = atual.id; state.modo = modo; renderWeeks(); renderAgenda(); location.hash = 'agendas'; };
+  const vazia = doc.contagem[0][0]==='0';
+  $('#home-atual').innerHTML = `<div class="tag casa">${atual.sintese?'Síntese':'Agenda'} FPMed</div>
+    <h3>${vazia?'Sem itens de interesse em pauta':(atual.sintese?'Resumo da semana':'Pauta da semana')}</h3>
+    <p class="t">${doc.resumo[0]}</p>
+    <div class="foot">${atual.sintese?pill('ok','Síntese publicada'):pill('neutral','Síntese em breve')}<a class="link" href="${atual.sintese?atual.pdfSintese:atual.pdfAgenda}" target="_blank" rel="noopener">Abrir PDF →</a></div>`;
+  $('#home-week').innerHTML = atual.dias.map(dia=>{
+    const itens = dia.itens.filter(it=>visivel(it,modo));
+    const lab = dia.feriado ? 'Feriado nacional' : ((modo==='previa' && dia.rotuloPrevia) || dia.rotulo);
+    return `<button type="button" class="day ${dia.feriado||!itens.length?'off':''}" data-go="agendas" data-semana="${atual.id}" data-dia="${dia.id}" aria-label="${dia.nome}, ${dia.data}: ${lab}">
       <span class="dn">${dia.nome.replace('-feira','')}</span>
       <span class="dd">${dia.data.split('/')[0]}<small>/${dia.data.split('/')[1]}</small></span>
       <span class="dl">${lab}</span>
-      <span class="dots">${itens.map(it=>`<i class="dot ${it.status||''}"></i>`).join('')}</span>
+      <span class="dots">${itens.map(it=>`<i class="dot ${modo==='sintese'?(it.status||''):''}"></i>`).join('')}</span>
     </button>`; }).join('');
+  $('#home-legend').innerHTML = modo==='sintese'
+    ? '<span><i class="dot ok"></i>Aprovado</span><span><i class="dot info"></i>Realizado ou em andamento</span><span><i class="dot ret"></i>Cancelado ou retirado de pauta</span>'
+    : '<span><i class="dot"></i>Item em pauta</span><span>Os resultados entram quando a síntese da semana for publicada.</span>';
 
-  const dest = [
-    {t:'ENAMED: MP 1370/2026 aprovada no Congresso', p:'A Comissão Mista aprovou o relatório do deputado Doutor Luizinho, na forma do PLV 14/2026, que seguiu à sanção presidencial.', st:'ok', meta:'Quinta, 15/10 · Congresso Nacional'},
-    {t:'Sessão Especial em homenagem ao Dia do Médico', p:'Iniciativa do presidente da FPMed, senador Dr. Hiran, no Plenário do Senado, com entidades médicas e o IBDM.', st:'info', meta:'Quarta, 14/10 · Senado Federal'},
-    {t:'PEC 221/2019 vira Emenda Constitucional nº 141/2026', p:'Aprovada em segundo turno por 75 votos a 1 e promulgada na sexta, reduz a jornada semanal sem redução salarial.', st:'ok', meta:'Quarta, 14/10 e sexta, 16/10 · Senado Federal'},
-    {t:'PEC 18/2025: Polícias Científicas', p:'A CCJ aprovou o parecer. A PEC saiu da pauta do Plenário, e a Emenda nº 60 do senador Dr. Hiran soma 18 de 27 assinaturas.', st:'ok', meta:'Quarta, 14/10 · CCJ do Senado'}
-  ];
-  $('#home-dest').innerHTML = dest.map(d=>`<article class="card"><div class="tag casa">${d.meta}</div><h3>${d.t}</h3><p class="t">${d.p}</p><div class="foot">${pill(d.st, d.st==='ok'?'Aprovado':'Realizado')}</div></article>`).join('');
-
-  $('#home-inf').innerHTML = INFORMES.slice(0,2).map(infCard).join('');
+  const sd = sin && sin.sintese, temSin = !!(sd && sd.destaques);
+  $('#sec-destaques').hidden = $('#sec-numeros').hidden = !temSin;
+  if(temSin){
+    const rotulo = sin.id===atual.id ? '' : 'Última síntese publicada: ';
+    $('#home-dest-sub').textContent = rotulo + sin.titulo;
+    $('#home-num-sub').textContent = 'Fonte: Síntese FPMed, ' + sin.titulo;
+    $('#home-dest').innerHTML = sd.destaques.map(d=>`<article class="card"><div class="tag casa">${d.meta}</div><h3>${d.t}</h3><p class="t">${d.p}</p><div class="foot">${pill(d.st, d.st==='ok'?'Aprovado':'Realizado')}</div></article>`).join('');
+    $('#home-stats').innerHTML = sd.numeros.map(n=>`<div class="stat"><b>${n[0]}</b><span>${n[1]}</span></div>`).join('');
+  }
+  $('#home-inf').innerHTML = [...INFORMES].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,2).map(infCard).join('');
 }
 
 /* ---------- informes ---------- */
