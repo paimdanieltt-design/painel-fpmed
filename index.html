@@ -275,14 +275,14 @@ body{margin:0}[hidden]{display:none!important}img{max-width:100%}
       <div class="legend" id="home-legend"></div>
     </section>
 
-    <section class="blk" id="sec-destaques">
-      <div class="sec-h"><h2>Destaques da síntese</h2><span class="sub" id="home-dest-sub"></span></div>
-      <div class="dest" id="home-dest"></div>
-    </section>
-
     <section class="blk" id="sec-numeros">
       <div class="sec-h"><h2>A semana em números</h2><span class="sub" id="home-num-sub"></span></div>
       <div class="stats" id="home-stats"></div>
+    </section>
+
+    <section class="blk" id="sec-destaques">
+      <div class="sec-h"><h2>Destaques da síntese</h2><span class="sub" id="home-dest-sub"></span></div>
+      <div class="dest" id="home-dest"></div>
     </section>
 
     <section class="blk">
@@ -631,13 +631,14 @@ function renderHome(){
     : '<span><i class="dot"></i>Item em pauta</span><span>Os resultados entram quando a síntese da semana for publicada.</span>';
 
   const sd = sin && sin.sintese, temSin = !!(sd && sd.destaques);
-  $('#sec-destaques').hidden = $('#sec-numeros').hidden = !temSin;
+  $('#sec-destaques').hidden = !temSin;
+  const nums = (atual.sintese && atual.sintese.numeros) || doc.contagem;
+  $('#home-num-sub').textContent = `Fonte: ${atual.sintese?'Síntese':'Agenda'} FPMed, ${atual.titulo}`;
+  $('#home-stats').innerHTML = nums.map(n=>`<div class="stat"><b>${n[0]}</b><span>${n[1]}</span></div>`).join('');
   if(temSin){
     const rotulo = sin.id===atual.id ? '' : 'Última síntese publicada: ';
     $('#home-dest-sub').textContent = rotulo + sin.titulo;
-    $('#home-num-sub').textContent = 'Fonte: Síntese FPMed, ' + sin.titulo;
     $('#home-dest').innerHTML = sd.destaques.map(d=>`<article class="card"><div class="tag casa">${d.meta}</div><h3>${d.t}</h3><p class="t">${d.p}</p><div class="foot">${pill(d.st, d.st==='ok'?'Aprovado':'Realizado')}</div></article>`).join('');
-    $('#home-stats').innerHTML = sd.numeros.map(n=>`<div class="stat"><b>${n[0]}</b><span>${n[1]}</span></div>`).join('');
   }
   $('#home-inf').innerHTML = [...INFORMES].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,2).map(infCard).join('');
 }
