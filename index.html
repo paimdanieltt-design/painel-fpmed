@@ -130,6 +130,7 @@ section.blk:first-child{margin-top:0}
 .seg{display:inline-flex;background:var(--surface-2);border-radius:10px;padding:3px}
 .seg button{border:0;background:none;padding:8px 16px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;color:var(--muted)}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--brand);box-shadow:0 1px 3px rgba(7,71,97,.15)}
+button:disabled{opacity:.45;cursor:not-allowed}
 select.search{flex:0 0 auto;cursor:pointer}
 
 /* agenda */
@@ -266,7 +267,12 @@ body{margin:0}[hidden]{display:none!important}img{max-width:100%}
   </div>
   <main class="wrap">
     <section class="blk">
-      <div class="sec-h"><h2>Semana de 12 a 16 de outubro de 2026</h2><button class="link" data-go="agendas">Ver agenda completa →</button></div>
+      <div class="sec-h"><h2>Esta semana</h2><span class="sub">Agenda publicada</span></div>
+      <article class="card" id="home-atual"></article>
+    </section>
+
+    <section class="blk">
+      <div class="sec-h"><h2>Semana de 12 a 16 de outubro de 2026</h2><button class="link" data-go="agendas" data-semana="2026-10-12">Ver agenda completa →</button></div>
       <div class="week" id="home-week"></div>
       <div class="legend">
         <span><i class="dot ok"></i>Aprovado</span><span><i class="dot info"></i>Realizado ou em andamento</span><span><i class="dot ret"></i>Cancelado ou retirado de pauta</span>
@@ -380,6 +386,23 @@ const MPV_EMENTA = 'Altera a Lei nº 12.871/2013, a Lei nº 3.268/1957, a Lei n�
 const PEC221 = 'Altera o art. 7º da Constituição Federal para reduzir a duração máxima semanal do trabalho e prever 2 dias de repouso semanal remunerado, sem redução salarial.';
 
 const SEMANAS = [{
+  id:'2026-10-19', titulo:'19 a 23 de outubro de 2026', curto:'19 a 23 out 2026',
+  pdfAgenda:'docs/agenda-2026-10-19.pdf', pdfSintese:null,
+  previa:{
+    contagem:[['0','proposições para monitoramento'],['0','na Câmara dos Deputados'],['0','no Senado Federal'],['0','na Comissão Mista do Congresso']],
+    eventos:'',
+    resumo:[
+      'A semana conta com baixa movimentação legislativa, com o segundo turno das eleições presidenciais previsto para domingo (25). Nesse contexto, o cenário é de redução das atividades, das sessões deliberativas e reuniões de comissão.',
+      'A FPMed mantém a observação com cautela para eventuais mudanças e inclusões de pauta de interesse da representação médica.'
+    ]},
+  sintese:null,
+  dias:[
+    {id:'seg', nome:'Segunda-feira', data:'19/10', rotulo:'Sem itens', vazioPrevia:'Sem itens de interesse em pauta.', itens:[]},
+    {id:'ter', nome:'Terça-feira', data:'20/10', rotulo:'Sem itens', vazioPrevia:'Sem itens de interesse em pauta.', itens:[]},
+    {id:'qua', nome:'Quarta-feira', data:'21/10', rotulo:'Sem itens', vazioPrevia:'Sem itens de interesse em pauta.', itens:[]},
+    {id:'qui', nome:'Quinta-feira', data:'22/10', rotulo:'Sem itens', vazioPrevia:'Sem itens de interesse em pauta.', itens:[]},
+    {id:'sex', nome:'Sexta-feira', data:'23/10', rotulo:'Sem itens', vazioPrevia:'Sem itens de interesse em pauta.', itens:[]}
+  ]},{
   id:'2026-10-12', titulo:'12 a 16 de outubro de 2026', curto:'12 a 16 out 2026',
   pdfAgenda:'docs/agenda-2026-10-12.pdf', pdfSintese:'docs/sintese-2026-10-12.pdf',
   previa:{
@@ -417,12 +440,12 @@ const SEMANAS = [{
       {casa:'senado', hora:'14h / 16h', local:'Plenário do Senado Federal', tipo:'Sessão deliberativa ordinária', sigla:'PEC 221/2019', ementa:PEC221, autoria:'Dep. Reginaldo Lopes (PT/MG)', pos:'acomp', status:'ok', resultado:'Aprovada a proposta, em segundo turno (75 votos favoráveis e um contrário).', destaque:true},
       {casa:'congresso', hora:'14h30', local:'Comissão Mista da MP nº 1370/2026 · Anexo II, Ala Senador Alexandre Costa, Plenário 9', tipo:'Apreciação do relatório', sigla:'MPV 1370/2026', ementa:MPV_EMENTA, autoria:'Poder Executivo', relatoria:'Doutor Luizinho (PP/RJ)', pos:'fav', posTxt:PROFIMED, status:'canc', resultado:'Reunião cancelada.', modo:'sintese'}
     ]},
-    {id:'qui', nome:'Quinta-feira', data:'15/10', rotulo:'ENAMED aprovado', itens:[
+    {id:'qui', nome:'Quinta-feira', data:'15/10', rotulo:'ENAMED aprovado', rotuloPrevia:'Pauta do Senado', itens:[
       {casa:'congresso', hora:'10h', local:'Comissão Mista da MP nº 1370/2026 · Anexo II, Ala Senador Alexandre Costa, Plenário 3', tipo:'Apreciação do relatório', sigla:'MPV 1370/2026', ementa:MPV_EMENTA, autoria:'Poder Executivo', relatoria:'Doutor Luizinho (PP/RJ)', pos:'fav', posTxt:PROFIMED, status:'ok', resultado:'Aprovado o relatório do deputado Doutor Luizinho (PP/RJ), na forma do PLV nº 14/2026, com registro de votos contrários dos senadores Astronauta Marcos Pontes e Alan Rick e da deputada Bia Kicis.', modo:'sintese', destaque:true},
       {casa:'congresso', hora:'', local:'Plenários da Câmara e do Senado', tipo:'Discussão e votação', sigla:'PLV 14/2026 (MPV 1370/2026)', ementa:MPV_EMENTA, autoria:'Poder Executivo', relatoria:'Doutor Luizinho (PP/RJ)', pos:'fav', posTxt:PROFIMED, status:'ok', resultado:'Aprovada a redação final. Segundo o resumo da síntese, a matéria avançou pelos dois Plenários no mesmo dia e seguiu à sanção presidencial.', modo:'sintese', destaque:true},
       {casa:'senado', hora:'14h / 16h', local:'Plenário do Senado Federal', tipo:'Sessão deliberativa ordinária · possivelmente em pauta', sigla:'PEC 221/2019', ementa:PEC221, autoria:'Dep. Reginaldo Lopes (PT/MG)', pos:'acomp', modo:'previa'}
     ]},
-    {id:'sex', nome:'Sexta-feira', data:'16/10', rotulo:'Promulgação', vazioPrevia:'Sem itens de interesse em pauta.', itens:[
+    {id:'sex', nome:'Sexta-feira', data:'16/10', rotulo:'Promulgação', rotuloPrevia:'Sem itens', vazioPrevia:'Sem itens de interesse em pauta.', itens:[
       {casa:'senado', hora:'', local:'Plenário do Senado Federal', tipo:'Sessão Solene', sigla:'Promulgação das ECs 140 e 141/2026', ementa:'Promulgação das Emendas Constitucionais nºs 140 e 141/2026, referentes às PECs nºs 14/2021 e 221/2019, que tratam, respectivamente, da aposentadoria diferenciada dos agentes comunitários de saúde e de combate às endemias e da redução da jornada semanal de trabalho.', pos:null, status:'info', resultado:'Sessão realizada.', modo:'sintese', destaque:true}
     ]}
   ]
@@ -512,13 +535,14 @@ window.addEventListener('hashchange', route);
 document.addEventListener('click', e => {
   const g = e.target.closest('[data-go]'); if(!g) return;
   if(g.dataset.inf){ openInforme(g.dataset.inf); }
+  if(g.dataset.semana){ state.semana=g.dataset.semana; state.modo=semanaAtual().sintese?'sintese':'previa'; renderWeeks(); renderAgenda(); }
   if(g.dataset.dia){ state.dia = g.dataset.dia; }
   if(location.hash === '#'+g.dataset.go){ route(); } else { location.hash = g.dataset.go; }
   if(g.dataset.dia){ setTimeout(()=>{ const d=document.getElementById('dia-'+g.dataset.dia); if(d) d.scrollIntoView({block:'start'}); },60); }
 });
 
 /* ---------- agenda ---------- */
-const state = {semana:SEMANAS[0].id, modo:'sintese', casa:'todas', q:'', dia:null};
+const state = {semana:SEMANAS[0].id, modo:SEMANAS[0].sintese?'sintese':'previa', casa:'todas', q:'', dia:null};
 const semanaAtual = () => SEMANAS.find(s=>s.id===state.semana);
 const visivel = (it, modo) => !it.modo || it.modo===modo;
 
@@ -541,13 +565,14 @@ function itemHTML(it, modo){
 function renderWeeks(){
   $('#weeks').innerHTML = SEMANAS.map(s=>`
     <button type="button" class="wk" data-id="${s.id}" aria-pressed="${s.id===state.semana}">
-      <b>${s.titulo}</b><span>Agenda e síntese disponíveis</span>
+      <b>${s.titulo}</b><span>${s.sintese?'Agenda e síntese disponíveis':'Agenda publicada · síntese em breve'}</span>
     </button>`).join('') + `<p class="note">As semanas anteriores entram aqui conforme forem publicadas.</p>`;
-  $$('.wk').forEach(b=>b.onclick=()=>{ state.semana=b.dataset.id; renderAgenda(); renderWeeks(); });
+  $$('.wk').forEach(b=>b.onclick=()=>{ state.semana=b.dataset.id; if(!semanaAtual().sintese) state.modo='previa'; renderAgenda(); renderWeeks(); });
 }
 
 function renderAgenda(){
-  const s = semanaAtual(), syn = state.modo==='sintese', d = syn ? s.sintese : s.previa;
+  const s = semanaAtual(), syn = state.modo==='sintese' && !!s.sintese, d = syn ? s.sintese : s.previa;
+  $('#m-sintese').disabled = !s.sintese; $('#m-sintese').title = s.sintese ? '' : 'A síntese desta semana ainda não foi publicada';
   $('#m-previa').setAttribute('aria-pressed', !syn); $('#m-sintese').setAttribute('aria-pressed', syn);
   const q = norm(state.q);
   const dias = s.dias.map(dia => {
@@ -563,29 +588,31 @@ function renderAgenda(){
       <div class="tag">${syn?'Síntese':'Agenda'} FPMed</div>
       <h3 style="margin-top:6px">${s.titulo}</h3>
       <div class="cols">${d.contagem.map(c=>`<div class="mini"><b>${c[0]}</b>${c[1]}</div>`).join('')}</div>
-      <p class="note" style="margin-top:14px"><b>Audiências e sessões especiais:</b> ${d.eventos}</p>
+      ${d.eventos?`<p class="note" style="margin-top:14px"><b>Audiências e sessões especiais:</b> ${d.eventos}</p>`:''}
       <div class="prose">${d.resumo.map(p=>`<p>${p}</p>`).join('')}</div>
       <div class="btnrow"><a class="btn" href="${pdf}" target="_blank" rel="noopener">Abrir PDF da ${syn?'síntese':'agenda'}</a>
-      <a class="btn ghost" href="${syn?s.pdfAgenda:s.pdfSintese}" target="_blank" rel="noopener">Abrir PDF da ${syn?'agenda':'síntese'}</a></div>
+      ${(syn?s.pdfAgenda:s.pdfSintese)?`<a class="btn ghost" href="${syn?s.pdfAgenda:s.pdfSintese}" target="_blank" rel="noopener">Abrir PDF da ${syn?'agenda':'síntese'}</a>`:''}</div>
     </section>`) + dias.map(({dia,itens})=>{
       if(filtrando && !itens.length) return '';
       let corpo;
       if(dia.feriado) corpo = `<div class="off-msg">${dia.feriado}</div>`;
       else if(!itens.length) corpo = `<div class="off-msg">${!syn && dia.vazioPrevia ? dia.vazioPrevia : 'Nenhum item nesta visão.'}</div>`;
       else corpo = itens.map(it=>itemHTML(it, state.modo)).join('');
-      const rot = !syn && dia.id==='qui' ? 'Pauta do Senado' : (!syn && dia.id==='sex' ? 'Sem itens' : dia.rotulo);
+      const rot = (!syn && dia.rotuloPrevia) || dia.rotulo;
       return `<section class="dia" id="dia-${dia.id}"><div class="dia-h"><h3>${dia.nome}</h3><small>${dia.data}/2026</small><span class="tag fl">${rot}</span></div>${corpo}</section>`;
     }).join('');
   $('#ag-body').innerHTML = html;
+  if(filtrando && !dias.some(x=>x.itens.length)) $('#ag-body').innerHTML = '<div class="vazio">Nenhum item de interesse nesta semana com esses filtros.</div>';
 }
 
 /* ---------- início ---------- */
 function renderHome(){
-  const s = SEMANAS[0];
+  const atual = SEMANAS[0], s = SEMANAS.find(x=>x.sintese);
+  $('#home-atual').innerHTML = `<div class="tag casa">Agenda · ${atual.titulo}</div><h3>${atual.previa.contagem[0][0]==='0'?'Sem itens de interesse em pauta':'Pauta da semana'}</h3><p class="t">${atual.previa.resumo[0]}</p><div class="foot">${pill('neutral','Síntese em breve')}<button class="link" data-go="agendas" data-semana="${atual.id}">Abrir a agenda →</button></div>`;
   $('#home-week').innerHTML = s.dias.map(dia=>{
     const itens = dia.itens.filter(it=>visivel(it,'sintese'));
     const lab = dia.feriado ? 'Feriado nacional' : dia.rotulo;
-    return `<button type="button" class="day ${dia.feriado?'off':''}" data-go="agendas" data-dia="${dia.id}" aria-label="${dia.nome}, ${dia.data}: ${lab}">
+    return `<button type="button" class="day ${dia.feriado?'off':''}" data-go="agendas" data-semana="${s.id}" data-dia="${dia.id}" aria-label="${dia.nome}, ${dia.data}: ${lab}">
       <span class="dn">${dia.nome.replace('-feira','')}</span>
       <span class="dd">${dia.data.split('/')[0]}<small>/${dia.data.split('/')[1]}</small></span>
       <span class="dl">${lab}</span>
