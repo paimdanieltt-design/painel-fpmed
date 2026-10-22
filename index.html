@@ -558,7 +558,7 @@ function renderAgenda(){
   });
   const filtrando = state.casa!=='todas' || q;
   const pdf = syn ? s.pdfSintese : s.pdfAgenda;
-  const html = `
+  const html = (state.casa!=='todas' ? '' : `
     <section class="sumario">
       <div class="tag">${syn?'Síntese':'Agenda'} FPMed</div>
       <h3 style="margin-top:6px">${s.titulo}</h3>
@@ -567,7 +567,7 @@ function renderAgenda(){
       <div class="prose">${d.resumo.map(p=>`<p>${p}</p>`).join('')}</div>
       <div class="btnrow"><a class="btn" href="${pdf}" target="_blank" rel="noopener">Abrir PDF da ${syn?'síntese':'agenda'}</a>
       <a class="btn ghost" href="${syn?s.pdfAgenda:s.pdfSintese}" target="_blank" rel="noopener">Abrir PDF da ${syn?'agenda':'síntese'}</a></div>
-    </section>` + dias.map(({dia,itens})=>{
+    </section>`) + dias.map(({dia,itens})=>{
       if(filtrando && !itens.length) return '';
       let corpo;
       if(dia.feriado) corpo = `<div class="off-msg">${dia.feriado}</div>`;
@@ -676,7 +676,7 @@ function openPerfil(i){
 }
 
 /* ---------- inicialização ---------- */
-chipGroup($('#ag-casa'), [['todas','Todas as casas'],['camara','Câmara'],['senado','Senado'],['congresso','Congresso']], 'todas', v=>{state.casa=v; renderAgenda();});
+chipGroup($('#ag-casa'), [['todas','Completa'],['camara','Câmara'],['senado','Senado'],['congresso','Congresso']], 'todas', v=>{state.casa=v; renderAgenda();});
 $('#m-previa').onclick = ()=>{state.modo='previa'; renderAgenda();};
 $('#m-sintese').onclick = ()=>{state.modo='sintese'; renderAgenda();};
 $('#ag-q').oninput = e=>{state.q=e.target.value; renderAgenda();};
