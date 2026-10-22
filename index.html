@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Painel FPMed</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: cabeçalho fixo com abas; faixa institucional azul-petróleo; conteúdo em colunas de leitura (agenda por dia, informes em lista + leitura). */
+:root{
+  --bg:#ffffff; --surface:#ffffff; --surface-2:#eaf1f5; --fg:#0e2733; --muted:#566f7c; --line:#d6e2e9;
+  --brand:#0a6c96; --brand-deep:#074761; --on-brand:#ffffff; --lime:#8cb82f;
+  --ok:#1b7a4b; --ok-bg:#e2f3ea; --warn:#9a6100; --warn-bg:#fbf0d9; --info:#0a6c96; --info-bg:#dfeef6; --neutral:#566f7c; --neutral-bg:#e6edf1;
+  --hero-1:#074761; --hero-2:#0a6c96; --logo-chip:transparent;
+  --font:'Montserrat',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+h1,h2,h3,h4{margin:0;line-height:1.2;text-wrap:balance;font-weight:700}
+p{margin:0}
+a{color:var(--brand)}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* cabeçalho */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--surface);z-index:30}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:24px;min-height:68px}
+.brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;flex:none}
+.brand img{height:40px;width:auto;display:block;background:var(--logo-chip);padding:3px 8px;border-radius:6px}
+.brand span{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border-left:1px solid var(--line);padding-left:14px;line-height:1.3}
+.nav{display:flex;gap:4px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{white-space:nowrap;text-decoration:none;color:var(--muted);font-weight:600;font-size:13px;padding:10px 14px;border-radius:8px;border-bottom:3px solid transparent}
+.nav a:hover{color:var(--fg);background:var(--surface-2)}
+.nav a[aria-current="page"]{color:var(--brand);border-bottom-color:var(--lime);border-radius:8px 8px 0 0}
+@media (max-width:760px){
+  .top .wrap{flex-wrap:wrap;gap:0;padding-top:10px}
+  .brand span{display:none}
+  .nav{width:100%;margin-left:-6px;order:3}
+}
+
+/* hero */
+.hero{background:linear-gradient(120deg,var(--hero-1),var(--hero-2));color:#fff;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-40px;width:340px;height:340px;border-radius:50%;border:44px solid rgba(255,255,255,.06)}
+.hero .wrap{padding-top:36px;padding-bottom:34px;position:relative;z-index:1}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;opacity:.8}
+.hero h1{font-size:clamp(26px,4.4vw,40px);font-weight:800;margin-top:10px;max-width:22ch}
+.hero p{margin-top:12px;max-width:62ch;opacity:.92;font-size:15px}
+.hero .bar{width:44px;height:4px;background:var(--lime);border-radius:2px;margin-top:20px}
+.hero.sm .wrap{padding-top:26px;padding-bottom:24px}
+.hero.sm h1{font-size:clamp(22px,3.4vw,30px)}
+
+main{padding-block:28px 56px}
+section.blk{margin-top:36px}
+section.blk:first-child{margin-top:0}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.sec-h h2{font-size:19px}
+.sec-h .sub{color:var(--muted);font-size:13px}
+.link{background:none;border:0;padding:0;cursor:pointer;color:var(--brand);font-weight:600;font-size:13px;text-decoration:none}
+.link:hover{text-decoration:underline}
+
+/* faixa da semana */
+.week{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;text-align:left;cursor:pointer;min-width:0}
+.day:hover{border-color:var(--brand)}
+.day .dn{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.day .dd{font-size:24px;font-weight:800;line-height:1}
+.day .dd small{font-size:12px;font-weight:600;color:var(--muted);margin-left:2px}
+.day .dl{font-size:12px;color:var(--muted);line-height:1.4}
+.day .dots{display:flex;gap:4px;margin-top:auto;padding-top:8px;flex-wrap:wrap}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--neutral)}
+.dot.ok{background:var(--ok)}.dot.canc,.dot.ret{background:var(--warn)}.dot.parc,.dot.info{background:var(--info)}
+.day.off{background:var(--surface-2);border-style:dashed}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+@media (max-width:760px){.week{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* números */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.stat b{display:block;font-size:30px;font-weight:800;line-height:1;color:var(--brand);font-variant-numeric:tabular-nums}
+.stat span{display:block;margin-top:8px;font-size:12px;color:var(--muted);font-weight:500;line-height:1.4}
+
+/* destaques */
+.dest{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
+.card.click{cursor:pointer;text-align:left;width:100%;display:block}
+.card.click:hover{border-color:var(--brand)}
+.card h3{font-size:16px;margin-top:10px}
+.card p.t{margin-top:8px;color:var(--muted);font-size:13.5px}
+.card .foot{margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+
+/* pills e tags */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.02em;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.canc,.pill.ret{background:var(--warn-bg);color:var(--warn)}
+.pill.parc,.pill.info,.pill.fav{background:var(--info-bg);color:var(--info)}
+.pill.acomp,.pill.neutral{background:var(--neutral-bg);color:var(--neutral)}
+.tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tag.casa{color:var(--brand)}
+
+/* informes */
+.inf-list{display:grid;gap:12px}
+.inf{display:grid;grid-template-columns:96px minmax(0,1fr);gap:18px;align-items:start}
+.inf .date{background:var(--surface-2);border-radius:10px;padding:10px 8px;text-align:center;line-height:1.1}
+.inf .date b{display:block;font-size:26px;font-weight:800;color:var(--brand)}
+.inf .date span{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.inf h3{margin-top:6px;font-size:17px}
+@media (max-width:560px){.inf{grid-template-columns:1fr;gap:10px}.inf .date{display:flex;gap:8px;align-items:baseline;justify-content:flex-start;padding:6px 12px;width:max-content}.inf .date b{font-size:18px}}
+
+/* controles */
+.ctrls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.search{flex:1 1 220px;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:14px}
+.search::placeholder{color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--muted)}
+.chip:hover{border-color:var(--brand);color:var(--fg)}
+.chip[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;padding:8px 16px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--brand);box-shadow:0 1px 3px rgba(7,71,97,.15)}
+select.search{flex:0 0 auto;cursor:pointer}
+
+/* agenda */
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.weeks{display:grid;gap:8px;position:sticky;top:calc(84px + env(safe-area-inset-top,0px))}
+@media (max-width:900px){.weeks{position:static}}
+.wk{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:left;cursor:pointer;width:100%}
+.wk[aria-pressed="true"]{border-color:var(--brand);box-shadow:inset 3px 0 0 var(--lime)}
+.wk b{display:block;font-size:14px}
+.wk span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.wk .docs{display:flex;gap:6px;margin-top:8px}
+.note{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+.sumario{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:22px}
+.sumario h3{font-size:16px}
+.sumario .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:14px}
+.sumario .mini{background:var(--surface-2);border-radius:10px;padding:12px 14px;font-size:13px}
+.sumario .mini b{display:block;font-size:22px;font-weight:800;color:var(--brand);line-height:1.1}
+.prose p{margin-top:12px;max-width:72ch;font-size:14.5px}
+.prose p:first-child{margin-top:12px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--brand);color:var(--on-brand);text-decoration:none;font-weight:700;font-size:13px;padding:9px 16px;border-radius:10px;border:1px solid var(--brand);cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--brand)}
+.dia{margin-top:26px;scroll-margin-top:100px}
+.dia-h{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;padding-bottom:10px;border-bottom:2px solid var(--line);margin-bottom:12px}
+.dia-h h3{font-size:17px}
+.dia-h small{color:var(--muted);font-weight:600;font-size:13px}
+.dia-h .fl{margin-left:auto}
+.off-msg{background:var(--surface-2);border-radius:10px;padding:14px 16px;font-size:13.5px;color:var(--muted)}
+.it{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:10px;display:grid;grid-template-columns:92px minmax(0,1fr);gap:16px}
+.it-time b{display:block;font-size:17px;font-weight:800;color:var(--brand);line-height:1.1}
+.it-time span{display:block;font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}
+.it-top{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.it h4{font-size:16px;margin-top:6px}
+.ementa{margin-top:6px;font-size:13.5px;color:var(--muted);max-width:78ch}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 18px;margin:12px 0 0;font-size:12.5px}
+.meta dt{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.meta dd{margin:2px 0 0}
+.pos{margin-top:12px;font-size:13px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.pos b{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.res{margin-top:12px;border-radius:8px;padding:10px 14px;font-size:13px;background:var(--neutral-bg)}
+.res b{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.res.ok{background:var(--ok-bg)}.res.ok b{color:var(--ok)}
+.res.canc,.res.ret{background:var(--warn-bg)}.res.canc b,.res.ret b{color:var(--warn)}
+.res.parc,.res.info{background:var(--info-bg)}.res.parc b,.res.info b{color:var(--info)}
+.nota{margin-top:10px;font-size:12.5px;color:var(--muted);border-left:3px solid var(--lime);padding-left:12px}
+@media (max-width:560px){.it{grid-template-columns:1fr;gap:8px}.it-time{display:flex;gap:10px;align-items:baseline}}
+
+/* leitura de informe */
+.reader{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(18px,4vw,36px)}
+.reader h2{font-size:clamp(21px,3vw,28px);max-width:30ch}
+.reader .lead{margin-top:12px;color:var(--muted);font-size:15px;max-width:68ch}
+.reader h3{font-size:15px;margin-top:28px;padding-top:6px;color:var(--brand);text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:700}
+.reader p{margin-top:10px;max-width:70ch}
+.reader ul{margin:10px 0 0;padding-left:20px;max-width:70ch}
+.reader li{margin-top:6px}
+.reader .sign{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.tbl{overflow-x:auto;margin-top:12px;border:1px solid var(--line);border-radius:10px}
+.tbl table{border-collapse:collapse;width:100%;min-width:480px;font-size:13.5px}
+.tbl th{background:var(--surface-2);text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 14px}
+.tbl td{padding:10px 14px;border-top:1px solid var(--line);vertical-align:top}
+.tbl td:first-child{font-weight:700;white-space:nowrap;color:var(--brand)}
+.back{margin-bottom:16px}
+
+/* perfil */
+.perfil{display:grid;grid-template-columns:200px minmax(0,1fr);gap:32px;align-items:start;margin-top:8px}
+.foto{width:200px;height:250px;border-radius:16px;background:linear-gradient(160deg,var(--brand-deep),var(--brand));color:#fff;display:grid;place-items:center;font-size:58px;font-weight:800;letter-spacing:.02em;overflow:hidden}
+.foto img{width:100%;height:100%;object-fit:cover;display:block}
+.perfil h2{font-size:clamp(30px,5vw,46px);font-weight:800;text-transform:uppercase;line-height:1.05;letter-spacing:-.01em}
+.dots-bar{height:5px;width:96px;margin:14px 0 14px;background:repeating-linear-gradient(90deg,var(--brand) 0 5px,transparent 5px 8px)}
+.pchips{display:flex;gap:8px;flex-wrap:wrap}
+.pchip{font-size:12px;font-weight:500;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 12px}
+.pchip.main{background:var(--ok-bg);border-color:transparent;color:var(--fg);font-weight:700}
+.campos{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px 18px;margin:24px 0 0;font-size:15px}
+.campos dt{color:var(--muted);font-size:13.5px;padding-top:2px}
+.campos dd{margin:0}
+.areas{display:flex;gap:8px;flex-wrap:wrap}
+.area{font-size:12px;font-weight:500;padding:4px 12px;border-radius:999px;background:var(--info-bg);color:var(--fg)}
+.area.a1{background:#e3f1d3}.area.a2{background:#dcf2ea}.area.a3{background:#f6dcdc}.area.a4{background:#ddeef6}.area.a5{background:#f6e8da}
+.perfil h3.bio-h{margin-top:40px;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.01em}
+.perfil .bio p{margin-top:14px;max-width:72ch;text-align:justify;hyphens:auto}
+.perfil .atua{margin-top:14px;max-width:72ch}
+.mem{width:100%;text-align:left;cursor:pointer}
+.mem:hover{border-color:var(--brand)}
+@media (max-width:720px){.perfil{grid-template-columns:1fr;gap:20px}.foto{width:160px;height:200px;font-size:46px}.campos{grid-template-columns:1fr;gap:2px 0}.campos dt{margin-top:10px}}
+/* membros */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:12px}
+.mem{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;gap:14px;align-items:flex-start;min-width:0}
+.av{flex:none;width:48px;height:48px;border-radius:50%;background:var(--brand-deep);color:#fff;font-weight:700;font-size:16px;display:grid;place-items:center;letter-spacing:.02em}
+.mem.pres .av{background:var(--lime);color:#14270a}
+.mem h3{font-size:15px}
+.mem .pt{font-size:12.5px;color:var(--muted);margin-top:2px}
+.mem .ro{font-size:12.5px;margin-top:8px;line-height:1.45}
+.mem .pill{margin-top:8px}
+.aviso{background:var(--warn-bg);color:var(--fg);border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:18px;border-left:4px solid var(--warn)}
+.vazio{padding:28px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px}
+
+footer{border-top:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:12.5px}
+footer .wrap{padding-block:22px;display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap}
+footer b{color:var(--fg)}
+.view[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0}[hidden]{display:none!important}img{max-width:100%}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio" aria-label="Painel FPMed, início">
+      <img src="logo.png" alt="FPMed, Frente Parlamentar Mista da Medicina" width="199" height="40">
+      <span>Painel de<br>produtos e entregas</span>
+    </a>
+    <nav class="nav" aria-label="Seções">
+      <a href="#inicio" data-v="inicio">Início</a>
+      <a href="#agendas" data-v="agendas">Agendas e Sínteses</a>
+      <a href="#informes" data-v="informes">Informes</a>
+      <a href="#membros" data-v="membros">Membros</a>
+    </nav>
+  </div>
+</header>
+
+<!-- INÍCIO -->
+<div class="view" id="v-inicio">
+  <div class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Frente Parlamentar Mista da Medicina</div>
+      <h1>Acompanhe o que a Frente fez no Congresso</h1>
+      <p>Agendas, sínteses semanais e informes técnicos da FPMed reunidos em um só lugar. Os destaques abaixo vêm da semana mais recente.</p>
+      <div class="bar"></div>
+    </div>
+  </div>
+  <main class="wrap">
+    <section class="blk">
+      <div class="sec-h"><h2>Semana de 12 a 16 de outubro de 2026</h2><button class="link" data-go="agendas">Ver agenda completa →</button></div>
+      <div class="week" id="home-week"></div>
+      <div class="legend">
+        <span><i class="dot ok"></i>Aprovado</span><span><i class="dot info"></i>Realizado ou em andamento</span><span><i class="dot ret"></i>Cancelado ou retirado de pauta</span>
+      </div>
+    </section>
+
+    <section class="blk">
+      <div class="sec-h"><h2>Destaques da agenda</h2><span class="sub">Resultados da síntese da semana</span></div>
+      <div class="dest" id="home-dest"></div>
+    </section>
+
+    <section class="blk">
+      <div class="sec-h"><h2>A semana em números</h2><span class="sub">Fonte: Síntese FPMed, 12 a 16 de outubro</span></div>
+      <div class="stats">
+        <div class="stat"><b>10</b><span>proposições monitoradas na semana</span></div>
+        <div class="stat"><b>2</b><span>Emendas Constitucionais promulgadas (nºs 140 e 141/2026)</span></div>
+        <div class="stat"><b>75 × 1</b><span>votos na aprovação da PEC 221/2019 em segundo turno no Senado</span></div>
+        <div class="stat"><b>18 de 27</b><span>assinaturas reunidas para a Emenda nº 60 (Polícias Científicas)</span></div>
+      </div>
+    </section>
+
+    <section class="blk">
+      <div class="sec-h"><h2>Últimos informes</h2><button class="link" data-go="informes">Ver todos →</button></div>
+      <div class="inf-list" id="home-inf"></div>
+    </section>
+  </main>
+</div>
+
+<!-- AGENDAS -->
+<div class="view" id="v-agendas" hidden>
+  <div class="hero sm"><div class="wrap">
+    <div class="eyebrow">Arquivo semanal</div>
+    <h1>Agendas e Sínteses</h1>
+    <p>A agenda antecipa a semana e a síntese registra o que aconteceu. Escolha a semana e alterne entre os dois documentos.</p>
+  </div></div>
+  <main class="wrap">
+    <div class="layout">
+      <aside class="weeks" id="weeks" aria-label="Semanas"></aside>
+      <div>
+        <div class="ctrls">
+          <div class="seg" role="group" aria-label="Documento">
+            <button type="button" id="m-previa" aria-pressed="false">Agenda</button>
+            <button type="button" id="m-sintese" aria-pressed="true">Síntese</button>
+          </div>
+          <input class="search" id="ag-q" type="search" placeholder="Buscar proposição, relator ou tema" aria-label="Buscar na agenda">
+        </div>
+        <div class="chips" id="ag-casa" role="group" aria-label="Casa" style="margin-bottom:6px"></div>
+        <div id="ag-body"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- INFORMES -->
+<div class="view" id="v-informes" hidden>
+  <div class="hero sm"><div class="wrap">
+    <div class="eyebrow">Notas técnicas</div>
+    <h1>Informes FPMed</h1>
+    <p>Análises curtas sobre proposições relevantes para a medicina brasileira, do mais recente ao mais antigo.</p>
+  </div></div>
+  <main class="wrap">
+    <div id="inf-lista">
+      <div class="ctrls">
+        <input class="search" id="inf-q" type="search" placeholder="Buscar informe" aria-label="Buscar informe">
+        <div class="chips" id="inf-casa" role="group" aria-label="Casa"></div>
+      </div>
+      <div class="inf-list" id="inf-items"></div>
+    </div>
+    <div id="inf-leitura" hidden></div>
+  </main>
+</div>
+
+<!-- MEMBROS -->
+<div class="view" id="v-membros" hidden>
+  <div class="hero sm"><div class="wrap">
+    <div class="eyebrow">Quem compõe a Frente</div>
+    <h1>Membros da Frente</h1>
+    <p>Parlamentares da FPMed e outros nomes que aparecem nos materiais publicados.</p>
+  </div></div>
+  <main class="wrap">
+    <div id="mem-lista">
+    <div class="aviso"><b>Lista em construção.</b> Por enquanto só consta a presidência. Os demais nomes aparecem como citados nos materiais e não indicam filiação à Frente.</div>
+    <div class="ctrls">
+      <input class="search" id="mem-q" type="search" placeholder="Buscar por nome" aria-label="Buscar parlamentar">
+      <select class="search" id="mem-casa" aria-label="Casa"><option value="">Câmara e Senado</option><option>Câmara</option><option>Senado</option></select>
+      <select class="search" id="mem-partido" aria-label="Partido"></select>
+      <select class="search" id="mem-uf" aria-label="UF"></select>
+    </div>
+    <div class="chips" id="mem-tipo" role="group" aria-label="Vínculo" style="margin-bottom:18px"></div>
+    <div class="grid" id="mem-grid"></div>
+    </div>
+    <div id="mem-perfil" hidden></div>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div><b>Frente Parlamentar Mista da Medicina — FPMed</b><br>Instituto Brasil de Medicina — IBDM</div>
+    <div>(61) 98595.3887 · fpmedicina@fpmedicina.org.br<br>SCES Trecho 3, Conjunto 6, Prédio AMBr, Sala 205</div>
+  </div>
+</footer>
+
+<script>
+/* ---------- dados ---------- */
+const CASA = {camara:'Câmara dos Deputados', senado:'Senado Federal', congresso:'Congresso Nacional'};
+const STATUS = {ok:'Aprovado', canc:'Reunião cancelada', ret:'Retirado de pauta', parc:'Apreciação parcial', info:'Realizado'};
+const POS = {acomp:'Acompanhar', fav:'Favorável', inst:'Posição institucional'};
+
+const PROFIMED = 'favorável à aprovação de texto nos moldes do último relatório apresentado pelo Sen. Dr. Hiran ao PL 2294/2024, PROFIMED.';
+const MPV_EMENTA = 'Altera a Lei nº 12.871/2013, a Lei nº 3.268/1957, a Lei nº 6.932/1981, a Lei nº 13.959/2019 e a Lei nº 10.861/2004 para dispor sobre o Exame Nacional de Avaliação da Formação Médica (ENAMED).';
+const PEC221 = 'Altera o art. 7º da Constituição Federal para reduzir a duração máxima semanal do trabalho e prever 2 dias de repouso semanal remunerado, sem redução salarial.';
+
+const SEMANAS = [{
+  id:'2026-10-12', titulo:'12 a 16 de outubro de 2026', curto:'12 a 16 out 2026',
+  pdfAgenda:'docs/agenda-2026-10-12.pdf', pdfSintese:'docs/sintese-2026-10-12.pdf',
+  previa:{
+    contagem:[['6','proposições para monitoramento'],['3','na Câmara dos Deputados'],['2','no Senado Federal'],['1','na Comissão Mista do Congresso']],
+    eventos:'Sessão Especial em homenagem ao Dia do Médico, quarta-feira (14/10), às 10h, no Plenário do Senado Federal.',
+    resumo:[
+      'A semana concentra duas agendas decisivas para a medicina brasileira: a apreciação do relatório da MP nº 1.370/2026, que trata do ENAMED, e a Sessão Especial do Senado em homenagem ao Dia do Médico.',
+      'Na terça-feira (13), às 14h30, a Comissão Mista tem prevista a apreciação do relatório da MP do ENAMED, sob relatoria do deputado Doutor Luizinho (PP/RJ). É o principal foco legislativo da FPMed na semana. A Frente defende um texto próximo ao último relatório do senador Dr. Hiran ao PL nº 2.294/2024, do PROFIMED.',
+      'Na quarta-feira (14), às 10h, a Sessão Especial, por iniciativa do senador Dr. Hiran Gonçalves, presidente da FPMed, será o principal marco institucional da semana, com participação da FPMed e do IBDM.',
+      'A agenda também acompanha a PEC nº 18/2025 (Polícias Científicas), três projetos na Comissão de Finanças e Tributação da Câmara e as discussões sobre a PEC nº 221/2019, da jornada de trabalho.'
+    ]},
+  sintese:{
+    contagem:[['10','proposições para monitoramento'],['7','na Câmara dos Deputados'],['3','no Senado Federal'],['1','na Comissão Mista do Congresso']],
+    eventos:'Sessão Especial do Dia do Médico (quarta, 14/10) e Sessão Solene de Promulgação das Emendas Constitucionais nºs 140 e 141/2026 (sexta, 16/10), ambas no Plenário do Senado.',
+    resumo:[
+      'A semana foi marcada pela aprovação do PLV nº 14/2026, decorrente da MP nº 1.370/2026 (ENAMED), e pela Sessão Especial em homenagem ao Dia do Médico, por iniciativa do presidente da FPMed, senador Dr. Hiran Gonçalves (PP/RR).',
+      'Após adiamentos da Comissão Mista, o relatório do deputado Doutor Luizinho (PP/RJ) foi aprovado na quinta-feira (15), na forma do PLV nº 14/2026. A matéria avançou pelos Plenários da Câmara e do Senado no mesmo dia e seguiu à sanção presidencial.',
+      'Na segurança pública, a CCJ do Senado aprovou o parecer à PEC nº 18/2025, depois retirada da pauta do Plenário por divergências sobre a maioridade penal. O adiamento amplia a janela de apoio à Emenda nº 60, do senador Dr. Hiran, que reconhece as Polícias Científicas como órgãos de segurança pública e já reúne 18 das 27 assinaturas necessárias.',
+      'A PEC nº 221/2019, que reduz a jornada semanal para 40 horas sem redução salarial, foi aprovada em segundo turno na quarta (14), com 75 votos favoráveis e um contrário, e promulgada na sexta (16) como Emenda Constitucional nº 141/2026.',
+      'Na Câmara, o PL nº 5.538/2019 (assistência a pessoas com epilepsia) teve a redação final aprovada e seguiu ao Senado. Também foi encaminhado ao Senado o PL nº 1.123/2025, sobre aceitação de exames da rede privada pelo SUS. O PL nº 1.435/2023, sobre prevenção de engasgos, foi aprovado com alterações e seguiu para sanção. Foi aprovado ainda o parecer ao PL nº 5.265/2013, sobre entidades de autogestão em saúde.'
+    ]},
+  dias:[
+    {id:'seg', nome:'Segunda-feira', data:'12/10', rotulo:'Feriado nacional', feriado:'Dia de Nossa Senhora Aparecida, Santa Padroeira do Brasil.', itens:[]},
+    {id:'ter', nome:'Terça-feira', data:'13/10', rotulo:'MP do ENAMED', itens:[
+      {casa:'camara', hora:'13h55', local:'Plenário da Câmara dos Deputados', tipo:'Discussão e votação', sigla:'PL 5538/2019', ementa:'Institui o Programa Nacional de Assistência Integral às Pessoas com Epilepsia.', autoria:'Ruy Carneiro (PODE-PB)', relatoria:'Laura Carneiro (PSD-RJ)', pos:'acomp', status:'ok', resultado:'Aprovada a redação final, a matéria vai ao Senado Federal.', modo:'sintese'},
+      {casa:'congresso', hora:'14h30', local:'Comissão Mista da MP nº 1370/2026 · Anexo II, Ala Senador Nilo Coelho, Plenário 6', tipo:'Apreciação do relatório', sigla:'MPV 1370/2026', ementa:MPV_EMENTA, autoria:'Poder Executivo', relatoria:'Doutor Luizinho (PP/RJ)', pos:'fav', posTxt:PROFIMED, status:'canc', resultado:'Reunião cancelada.', nota:'Materiais de apoio na agenda: Dossiê FPMed sobre a MP 1370/2026 e Mapa das Emendas apresentadas.', destaque:true},
+      {casa:'senado', hora:'14h / 16h', local:'Plenário do Senado Federal', tipo:'Sessão deliberativa ordinária', sigla:'PEC 221/2019', ementa:PEC221, autoria:'Dep. Reginaldo Lopes (PT/MG)', pos:'acomp', status:'parc', resultado:'Apreciação parcial. Quarta sessão de discussão, em primeiro turno.'}
+    ]},
+    {id:'qua', nome:'Quarta-feira', data:'14/10', rotulo:'Sessão Especial Dia do Médico', itens:[
+      {casa:'senado', hora:'9h', local:'CCJ do Senado · Anexo II, Ala Senador Alexandre Costa, Plenário 3', tipo:'Sessão deliberativa ordinária', sigla:'PEC 18/2025', ementa:'Altera os arts. 5º, 15, 22, 23, 24, 40, 49, 84, 103-B, 130-A e 144 da Constituição Federal e o art. 76 do ADCT; acrescenta os arts. 144-A e 144-B à Constituição e os arts. 139, 140 e 141 ao ADCT. Tema: segurança pública.', autoria:'Poder Executivo', relatoria:'Rogério Carvalho (PT/SE)', pos:'inst', posTxt:'a FPMed reforça seu posicionamento pelo reconhecimento das Polícias Científicas, nos termos da aprovação da emenda nº 60.', status:'ok', resultado:'Aprovado o parecer. Ficam prejudicados os destaques para as Emendas nºs 13, 29 e 45, que não dialogam diretamente com as pautas da Medicina Brasileira.', previaRes:'', destaque:true, notaPrevia:'Serão discutidas as emendas destacadas nºs 13, 29 e 45, que não dialogam diretamente com as pautas da Medicina Brasileira.'},
+      {casa:'senado', hora:'10h', local:'Plenário do Senado Federal', tipo:'Sessão Especial · Homenagem ao Dia do Médico', sigla:'Dia do Médico', ementa:'Homenagem à medicina brasileira e à contribuição dos médicos para a saúde da população, por iniciativa do senador Dr. Hiran Gonçalves, presidente da FPMed. Participação institucional da FPMed e do Instituto Brasil de Medicina (IBDM).', pos:null, status:'info', resultado:'A sessão destacou os desafios da valorização profissional, das condições de trabalho e da qualidade da formação médica. O senador Dr. Hiran criticou as jornadas exaustivas, a remuneração inadequada e a falta de estrutura nos serviços. A senadora Tereza Cristina (PP/MS) destacou propostas sobre piso salarial, formação e residência médica, e entidades médicas reforçaram o combate à precarização do trabalho.', destaque:true},
+      {casa:'camara', hora:'10h', local:'CFT da Câmara · Anexo II, Plenário 04', tipo:'Sessão deliberativa ordinária', sigla:'PL 665/2011', ementa:'Dispõe sobre o acesso gratuito dos portadores de hiperplasia benigna ou câncer de próstata aos medicamentos que necessitam.', autoria:'Hugo Leal (PSD-RJ)', relatoria:'Merlong Solano (PT-PI)', pos:'fav', status:'ret', resultado:'Retirado de pauta.'},
+      {casa:'camara', hora:'10h', local:'CFT da Câmara · Anexo II, Plenário 04', tipo:'Sessão deliberativa ordinária', sigla:'PL 5265/2013', ementa:'Altera o art. 24 da Lei nº 8.666/1993 para prever dispensa de licitação na contratação de entidades sem fins lucrativos de autogestão em saúde, destinadas à assistência de servidores públicos e seus dependentes.', autoria:'Erika Kokay (PT/DF)', relatoria:'Merlong Solano (PT/PI)', pos:'acomp', nota:'O substitutivo incorpora a medida à nova Lei de Licitações, buscando segurança jurídica à contratação dessas entidades pela Administração Pública. Exige preço compatível com o mercado e restringe a dispensa às entidades constituídas para essa finalidade antes da vigência da Lei nº 14.133/2021.', status:'ok', resultado:'Aprovado o parecer.'},
+      {casa:'camara', hora:'10h', local:'CFT da Câmara · Anexo II, Plenário 04', tipo:'Sessão deliberativa ordinária', sigla:'PL 5641/2016', ementa:'Dispõe sobre sanções aos entes federativos nos casos de atrasos ou interrupções de repasses de recursos do SUS às entidades que especifica (Santas Casas e outras entidades filantrópicas).', autoria:'Antonio Brito (PSD/BA)', relatoria:'Sidney Leite (PSD/AM)', pos:'acomp', status:'ret', resultado:'Retirado de pauta.'},
+      {casa:'senado', hora:'14h / 16h', local:'Plenário do Senado Federal', tipo:'Sessão deliberativa ordinária', sigla:'PEC 221/2019', ementa:PEC221, autoria:'Dep. Reginaldo Lopes (PT/MG)', pos:'acomp', status:'ok', resultado:'Aprovada a proposta, em segundo turno (75 votos favoráveis e um contrário).', destaque:true},
+      {casa:'congresso', hora:'14h30', local:'Comissão Mista da MP nº 1370/2026 · Anexo II, Ala Senador Alexandre Costa, Plenário 9', tipo:'Apreciação do relatório', sigla:'MPV 1370/2026', ementa:MPV_EMENTA, autoria:'Poder Executivo', relatoria:'Doutor Luizinho (PP/RJ)', pos:'fav', posTxt:PROFIMED, status:'canc', resultado:'Reunião cancelada.', modo:'sintese'}
+    ]},
+    {id:'qui', nome:'Quinta-feira', data:'15/10', rotulo:'ENAMED aprovado', itens:[
+      {casa:'congresso', hora:'10h', local:'Comissão Mista da MP nº 1370/2026 · Anexo II, Ala Senador Alexandre Costa, Plenário 3', tipo:'Apreciação do relatório', sigla:'MPV 1370/2026', ementa:MPV_EMENTA, autoria:'Poder Executivo', relatoria:'Doutor Luizinho (PP/RJ)', pos:'fav', posTxt:PROFIMED, status:'ok', resultado:'Aprovado o relatório do deputado Doutor Luizinho (PP/RJ), na forma do PLV nº 14/2026, com registro de votos contrários dos senadores Astronauta Marcos Pontes e Alan Rick e da deputada Bia Kicis.', modo:'sintese', destaque:true},
+      {casa:'congresso', hora:'', local:'Plenários da Câmara e do Senado', tipo:'Discussão e votação', sigla:'PLV 14/2026 (MPV 1370/2026)', ementa:MPV_EMENTA, autoria:'Poder Executivo', relatoria:'Doutor Luizinho (PP/RJ)', pos:'fav', posTxt:PROFIMED, status:'ok', resultado:'Aprovada a redação final. Segundo o resumo da síntese, a matéria avançou pelos dois Plenários no mesmo dia e seguiu à sanção presidencial.', modo:'sintese', destaque:true},
+      {casa:'senado', hora:'14h / 16h', local:'Plenário do Senado Federal', tipo:'Sessão deliberativa ordinária · possivelmente em pauta', sigla:'PEC 221/2019', ementa:PEC221, autoria:'Dep. Reginaldo Lopes (PT/MG)', pos:'acomp', modo:'previa'}
+    ]},
+    {id:'sex', nome:'Sexta-feira', data:'16/10', rotulo:'Promulgação', vazioPrevia:'Sem itens de interesse em pauta.', itens:[
+      {casa:'senado', hora:'', local:'Plenário do Senado Federal', tipo:'Sessão Solene', sigla:'Promulgação das ECs 140 e 141/2026', ementa:'Promulgação das Emendas Constitucionais nºs 140 e 141/2026, referentes às PECs nºs 14/2021 e 221/2019, que tratam, respectivamente, da aposentadoria diferenciada dos agentes comunitários de saúde e de combate às endemias e da redução da jornada semanal de trabalho.', pos:null, status:'info', resultado:'Sessão realizada.', modo:'sintese', destaque:true}
+    ]}
+  ]
+}];
+
+const INFORMES = [
+  {id:'pl3026', data:'2026-10-21', casa:'camara', tema:'Trabalho e emprego', pdf:'docs/informe-pl-3026-2026.pdf',
+   titulo:'PL 3026/2026: proibição de PJ em atividades-fim, inclusive na saúde',
+   lide:'Projeto da Dep. Heloísa Helena (REDE/RJ) proíbe a contratação de PJ nas atividades-fim, com destaque para a saúde. Aguarda relator na CTRAB; ainda passará por CFT e CCJC.',
+   blocos:[
+    {h:'Resumo executivo', p:[
+      'O PL 3026/2026 foi apresentado em 10 de junho de 2026 pela deputada Heloísa Helena (REDE/RJ). A proposta proíbe a contratação de pessoas jurídicas para o exercício de atividades-fim de empresas públicas e privadas e destaca as áreas de saúde, segurança e fiscalização dos Conselhos de Fiscalização Profissional.',
+      'O texto prevê a nulidade da contratação de pessoa jurídica nessas hipóteses e a presunção de vínculo empregatício quando presentes os requisitos da CLT. Também estabelece multa, impedimento de contratar com o poder público e prazo de 180 dias para adequação dos contratos vigentes.',
+      'A matéria tramita em regime ordinário, sob apreciação conclusiva, e foi distribuída às comissões de Trabalho (CTRAB), de Finanças e Tributação (CFT) e de Constituição e Justiça e de Cidadania (CCJC). No momento, aguarda a designação de relator na CTRAB.']},
+    {h:'Principais pontos do texto', p:['O projeto veda explicitamente a contratação de pessoas jurídicas para atividades-fim das empresas públicas ou privadas quando as atividades exigirem subordinação, pessoalidade, habitualidade e onerosidade (Art. 1º). A lei entra em vigor na data de sua eventual publicação (Art. 8º).'],
+      tabela:[
+        ['Art. 2º','Proíbe, em qualquer hipótese, a contratação de pessoas jurídicas nas áreas de saúde (assistência direta ao paciente, diagnóstico, tratamento, procedimentos clínicos ou cirúrgicos e demais atos privativos de profissionais regulamentados), segurança e fiscalização profissional (inspeção, auditoria, análise técnica, pareceres, autos de infração e demais atividades típicas dos Conselhos).'],
+        ['Art. 3º','A contratação de pessoa jurídica para essas atividades é nula de pleno direito, com presunção de vínculo empregatício direto entre o trabalhador e a contratante, quando presentes os requisitos dos arts. 2º e 3º da CLT.'],
+        ['Art. 4º','Os Conselhos de Fiscalização Profissional devem manter quadro próprio de servidores ou empregados para as atividades de fiscalização, vedada a substituição por contratos com pessoas jurídicas.'],
+        ['Art. 5º','Penalidades: multa de R$ 50.000,00 por trabalhador irregularmente contratado, dobrada em caso de reincidência; impedimento de contratar com o poder público por até 5 anos; e comunicação obrigatória ao Ministério Público do Trabalho.'],
+        ['Art. 6º','A lei não se aplica a atividades de natureza intelectual, científica, artística ou de consultoria especializada, desde que não caracterizada relação de emprego e que não se trate de atividade-fim da contratante.'],
+        ['Art. 7º','Contratos vigentes que contrariem a lei devem ser adequados ou rescindidos em até 180 dias, contados da publicação.']]},
+    {h:'Contexto de apresentação', p:[
+      'O PL 3.026/2026 foi apresentado em um contexto político de amplo debate sobre a pejotização, modalidade de contratação de profissionais por meio de pessoas jurídicas. A iniciativa da Deputada Heloísa Helena tem como objetivo mitigar os efeitos da pejotização em atividades-fim de setores essenciais. Na justificação, a parlamentar ressaltou a necessidade de responsabilidade técnica e de fortalecimento dos vínculos laborais, além da garantia da qualidade dos serviços essenciais prestados à população.',
+      'A proposta é relevante para a categoria médica, pois alcança a contratação de profissionais para assistência direta ao paciente, diagnóstico e procedimentos, e pode repercutir na organização de hospitais, clínicas e demais prestadores de serviços de saúde.']},
+    {h:'Tramitação e próximos passos', p:[
+      'O PL tramita em regime ordinário (art. 151, III, RICD) e está sujeito à apreciação conclusiva das comissões (art. 24, II, RICD). Assim, não passa pelo Plenário, salvo recurso para esse fim (art. 58, §2º, I, da CF).',
+      'Após a apresentação em 10 de junho, a proposta foi despachada às comissões. Aguarda a designação de relator na Comissão de Trabalho (CTRAB), a primeira comissão de mérito, seguida pela CFT e pela CCJC.',
+      'Quanto ao fim da legislatura, o art. 105, VI, do RICD, com redação da Resolução nº 33/2022, ressalva do arquivamento as proposições destinadas à elaboração das espécies normativas do art. 59 da Constituição que não tenham tramitado por três legislaturas completas. Assim, o PL 3026/2026 não deve ser arquivado em 31/01/2027 e seguirá em tramitação na próxima legislatura.',
+      'A FPMed segue acompanhando a tramitação e informará eventuais avanços, em especial a designação do relator na Comissão de Trabalho.']}
+   ]},
+  {id:'pl3941', data:'2026-10-20', casa:'senado', tema:'Saúde pública e SUS', pdf:'docs/informe-pl-3941-2025.pdf',
+   titulo:'Prevenção cardiovascular avança no Senado com parecer favorável do presidente da FPMed',
+   lide:'Relatório de Dr. Hiran (PP/RR) propõe aprovação, com substitutivo, do PL nº 3.941/2025, que institui a Política Nacional de Prevenção e Controle das Doenças Cardiovasculares no SUS.',
+   blocos:[
+    {h:'Resumo executivo', p:['A Comissão de Assuntos Sociais (CAS) do Senado Federal recebeu, em 19 de outubro, o relatório do senador Dr. Hiran (PP/RR), presidente da FPMed, favorável à aprovação do PL nº 3.941/2025, nos termos de emenda substitutiva. De autoria do senador Rogério Carvalho (PT/SE), a proposta institui a Política Nacional de Prevenção e Controle das Doenças Cardiovasculares e prevê a criação de um sistema nacional de acompanhamento de pacientes no SUS. A apresentação do parecer encerra a etapa de instrução e relatoria, e a matéria passa a aguardar inclusão na pauta deliberativa da CAS, onde tramita em caráter terminativo.'],
+      lista:['Tramitação: após audiência pública em junho, Dr. Hiran apresentou parecer favorável com substitutivo, que aguarda deliberação na CAS.','Alterações no texto: o substitutivo reduz a proposta de quatorze para nove artigos, concentra as disposições em diretrizes gerais e preserva a criação do SISAC-DCV.','Assistência cardiovascular: o texto fortalece a prevenção, a continuidade do cuidado, a formação profissional e a integração entre atenção primária, especializada e hospitalar, com estímulo à telessaúde.']},
+    {h:'Prevenção e controle das doenças cardiovasculares: PL nº 3.941/2025', p:[
+      'O PL tramita em caráter terminativo na CAS, sob relatoria do senador Dr. Hiran. Após a audiência pública de junho de 2026, o relator apresentou, em 19 de outubro, parecer favorável acompanhado de emenda substitutiva.',
+      'A proposta institui a Política Nacional de Prevenção e Controle das Doenças Cardiovasculares, abrangendo prevenção, diagnóstico, tratamento e acompanhamento dos pacientes no SUS. O substitutivo reduz o texto original de quatorze para nove artigos, priorizando diretrizes gerais e incorporando parcialmente as contribuições das entidades na audiência, especialmente sobre integração assistencial, formação profissional e participação de instituições científicas.',
+      'O novo texto preserva a organização das linhas de cuidado, a formação permanente dos profissionais e o uso da telessaúde, especialmente em regiões com menor oferta de especialistas. Em contrapartida, retira disposições específicas sobre composição mínima de equipes multiprofissionais, incentivos à residência médica e mecanismos de alertas clínicos.',
+      'Também mantém a criação do Sistema Nacional de Acompanhamento da Pessoa com Suspeita ou Diagnóstico de Doença Cardiovascular (SISAC-DCV), integrado aos sistemas de informação existentes para acompanhamento longitudinal dos pacientes e consolidação de dados clínicos e epidemiológicos. Sua organização e funcionamento serão definidos em regulamentação posterior.']},
+    {h:'Próximos passos', p:[
+      'O parecer favorável do senador Dr. Hiran fortalece uma pauta prioritária da FPMed ao consolidar diretrizes para prevenção, diagnóstico e assistência cardiovascular integrada no SUS. O substitutivo preserva a centralidade do acompanhamento clínico e da atenção especializada, mas reduz dispositivos específicos sobre composição das equipes e formação de especialistas, transferindo maior responsabilidade à regulamentação e à gestão dos serviços.',
+      'O PL nº 3.941/2025 aguarda inclusão na pauta deliberativa da CAS. Em caso de aprovação terminativa, será aberto o prazo regimental para eventual recurso ao Plenário do Senado, antes do encaminhamento à Câmara dos Deputados.',
+      'A FPMed seguirá acompanhando a tramitação, com atenção aos impactos do substitutivo sobre a organização da assistência cardiovascular e as condições de implementação da política no SUS.']}
+   ]}
+];
+
+/* vinculo: 'membro' | 'citado'. Complete esta lista para preencher a aba. */
+const MEMBROS = [
+  {nome:'Dr. Hiran Gonçalves', casa:'Senado', partido:'PP', uf:'RR', vinculo:'membro', cargo:'Presidente da FPMed', papel:'Autor da Sessão Especial do Dia do Médico e da Emenda nº 60 à PEC 18/2025. Relator do PL 3.941/2025 na CAS.'},
+  {nome:'Doutor Luizinho', casa:'Câmara', partido:'PP', uf:'RJ', vinculo:'citado', papel:'Relator da MPV 1370/2026 (ENAMED)'},
+  {nome:'Tereza Cristina', casa:'Senado', partido:'PP', uf:'MS', vinculo:'citado', papel:'Discursou na Sessão Especial do Dia do Médico'},
+  {nome:'Rogério Carvalho', casa:'Senado', partido:'PT', uf:'SE', vinculo:'citado', papel:'Autor do PL 3.941/2025 e relator da PEC 18/2025 na CCJ'},
+  {nome:'Laura Carneiro', casa:'Câmara', partido:'PSD', uf:'RJ', vinculo:'citado', papel:'Relatora do PL 5538/2019 (epilepsia)'},
+  {nome:'Merlong Solano', casa:'Câmara', partido:'PT', uf:'PI', vinculo:'citado', papel:'Relator dos PLs 665/2011 e 5265/2013 na CFT'},
+  {nome:'Heloísa Helena', casa:'Câmara', partido:'REDE', uf:'RJ', vinculo:'citado', papel:'Autora do PL 3026/2026 (PJ em atividades-fim)'},
+  {nome:'Sidney Leite', casa:'Câmara', partido:'PSD', uf:'AM', vinculo:'citado', papel:'Relator do PL 5641/2016 (repasses do SUS)'}
+];
+
+/* ---------- utilidades ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const norm = s => (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const dataBR = iso => { const [y,m,d]=iso.split('-'); return {d, m:MESES[+m-1], y, full:`${d}/${m}/${y}`}; };
+const pill = (cls, txt) => `<span class="pill ${cls}">${txt}</span>`;
+const initials = n => n.replace(/^(Dr\.|Doutor|Dra\.)\s+/,'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+function chipGroup(el, opts, current, onChange){
+  el.innerHTML = opts.map(([v,l])=>`<button type="button" class="chip" data-v="${v}" aria-pressed="${v===current}">${l}</button>`).join('');
+  el.onclick = e => { const b=e.target.closest('.chip'); if(!b) return; $$('.chip',el).forEach(c=>c.setAttribute('aria-pressed', c===b)); onChange(b.dataset.v); };
+}
+const NF = '<span style="color:var(--muted)">Não informado</span>';
+
+/* ---------- navegação ---------- */
+const VIEWS = ['inicio','agendas','informes','membros'];
+function route(){
+  let v = (location.hash||'').replace('#','');
+  if(!VIEWS.includes(v)) v = 'inicio';
+  VIEWS.forEach(x => { $('#v-'+x).hidden = x!==v; });
+  $$('.nav a').forEach(a => a.removeAttribute('aria-current'));
+  $(`.nav a[data-v="${v}"]`).setAttribute('aria-current','page');
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', route);
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]'); if(!g) return;
+  if(g.dataset.inf){ openInforme(g.dataset.inf); }
+  if(g.dataset.dia){ state.dia = g.dataset.dia; }
+  if(location.hash === '#'+g.dataset.go){ route(); } else { location.hash = g.dataset.go; }
+  if(g.dataset.dia){ setTimeout(()=>{ const d=document.getElementById('dia-'+g.dataset.dia); if(d) d.scrollIntoView({block:'start'}); },60); }
+});
+
+/* ---------- agenda ---------- */
+const state = {semana:SEMANAS[0].id, modo:'sintese', casa:'todas', q:'', dia:null};
+const semanaAtual = () => SEMANAS.find(s=>s.id===state.semana);
+const visivel = (it, modo) => !it.modo || it.modo===modo;
+
+function itemHTML(it, modo){
+  const syn = modo==='sintese';
+  const meta = [['Autoria', it.autoria],['Relatoria', it.relatoria],['Local', it.local]].filter(m=>m[1]).map(m=>`<div><dt>${m[0]}</dt><dd>${m[1]}</dd></div>`).join('');
+  const pos = it.pos ? `<div class="pos"><b>Posição FPMed</b>${pill(it.pos==='fav'?'fav':'acomp', POS[it.pos])}${it.posTxt?`<span>${it.posTxt}</span>`:''}</div>` : '';
+  const res = syn && it.resultado ? `<div class="res ${it.status}"><b>Resultado · ${STATUS[it.status]}</b>${it.resultado}</div>` : '';
+  const nota = it.nota ? `<div class="nota">${it.nota}</div>` : (!syn && it.notaPrevia ? `<div class="nota">${it.notaPrevia}</div>` : '');
+  return `<article class="it">
+    <div class="it-time"><b>${it.hora||'—'}</b><span>${CASA[it.casa]}</span></div>
+    <div>
+      <div class="it-top"><span class="tag casa">${it.tipo}</span>${syn&&it.status?pill(it.status,STATUS[it.status]):''}</div>
+      <h4>${it.sigla}</h4>
+      <p class="ementa">${it.ementa}</p>
+      <dl class="meta">${meta}</dl>${pos}${nota}${res}
+    </div></article>`;
+}
+
+function renderWeeks(){
+  $('#weeks').innerHTML = SEMANAS.map(s=>`
+    <button type="button" class="wk" data-id="${s.id}" aria-pressed="${s.id===state.semana}">
+      <b>${s.titulo}</b><span>Agenda e síntese disponíveis</span>
+    </button>`).join('') + `<p class="note">As semanas anteriores entram aqui conforme forem publicadas.</p>`;
+  $$('.wk').forEach(b=>b.onclick=()=>{ state.semana=b.dataset.id; renderAgenda(); renderWeeks(); });
+}
+
+function renderAgenda(){
+  const s = semanaAtual(), syn = state.modo==='sintese', d = syn ? s.sintese : s.previa;
+  $('#m-previa').setAttribute('aria-pressed', !syn); $('#m-sintese').setAttribute('aria-pressed', syn);
+  const q = norm(state.q);
+  const dias = s.dias.map(dia => {
+    const itens = dia.itens.filter(it => visivel(it, state.modo)
+      && (state.casa==='todas' || it.casa===state.casa)
+      && (!q || norm([it.sigla,it.ementa,it.autoria,it.relatoria,it.tipo,it.local].join(' ')).includes(q)));
+    return {dia, itens};
+  });
+  const filtrando = state.casa!=='todas' || q;
+  const pdf = syn ? s.pdfSintese : s.pdfAgenda;
+  const html = `
+    <section class="sumario">
+      <div class="tag">${syn?'Síntese':'Agenda'} FPMed</div>
+      <h3 style="margin-top:6px">${s.titulo}</h3>
+      <div class="cols">${d.contagem.map(c=>`<div class="mini"><b>${c[0]}</b>${c[1]}</div>`).join('')}</div>
+      <p class="note" style="margin-top:14px"><b>Audiências e sessões especiais:</b> ${d.eventos}</p>
+      <div class="prose">${d.resumo.map(p=>`<p>${p}</p>`).join('')}</div>
+      <div class="btnrow"><a class="btn" href="${pdf}" target="_blank" rel="noopener">Abrir PDF da ${syn?'síntese':'agenda'}</a>
+      <a class="btn ghost" href="${syn?s.pdfAgenda:s.pdfSintese}" target="_blank" rel="noopener">Abrir PDF da ${syn?'agenda':'síntese'}</a></div>
+    </section>` + dias.map(({dia,itens})=>{
+      if(filtrando && !itens.length) return '';
+      let corpo;
+      if(dia.feriado) corpo = `<div class="off-msg">${dia.feriado}</div>`;
+      else if(!itens.length) corpo = `<div class="off-msg">${!syn && dia.vazioPrevia ? dia.vazioPrevia : 'Nenhum item nesta visão.'}</div>`;
+      else corpo = itens.map(it=>itemHTML(it, state.modo)).join('');
+      const rot = !syn && dia.id==='qui' ? 'Pauta do Senado' : (!syn && dia.id==='sex' ? 'Sem itens' : dia.rotulo);
+      return `<section class="dia" id="dia-${dia.id}"><div class="dia-h"><h3>${dia.nome}</h3><small>${dia.data}/2026</small><span class="tag fl">${rot}</span></div>${corpo}</section>`;
+    }).join('');
+  $('#ag-body').innerHTML = html;
+}
+
+/* ---------- início ---------- */
+function renderHome(){
+  const s = SEMANAS[0];
+  $('#home-week').innerHTML = s.dias.map(dia=>{
+    const itens = dia.itens.filter(it=>visivel(it,'sintese'));
+    const lab = dia.feriado ? 'Feriado nacional' : dia.rotulo;
+    return `<button type="button" class="day ${dia.feriado?'off':''}" data-go="agendas" data-dia="${dia.id}" aria-label="${dia.nome}, ${dia.data}: ${lab}">
+      <span class="dn">${dia.nome.replace('-feira','')}</span>
+      <span class="dd">${dia.data.split('/')[0]}<small>/${dia.data.split('/')[1]}</small></span>
+      <span class="dl">${lab}</span>
+      <span class="dots">${itens.map(it=>`<i class="dot ${it.status||''}"></i>`).join('')}</span>
+    </button>`; }).join('');
+
+  const dest = [
+    {t:'ENAMED: MP 1370/2026 aprovada no Congresso', p:'A Comissão Mista aprovou o relatório do deputado Doutor Luizinho, na forma do PLV 14/2026, que seguiu à sanção presidencial.', st:'ok', meta:'Quinta, 15/10 · Congresso Nacional'},
+    {t:'Sessão Especial em homenagem ao Dia do Médico', p:'Iniciativa do presidente da FPMed, senador Dr. Hiran, no Plenário do Senado, com entidades médicas e o IBDM.', st:'info', meta:'Quarta, 14/10 · Senado Federal'},
+    {t:'PEC 221/2019 vira Emenda Constitucional nº 141/2026', p:'Aprovada em segundo turno por 75 votos a 1 e promulgada na sexta, reduz a jornada semanal sem redução salarial.', st:'ok', meta:'Quarta, 14/10 e sexta, 16/10 · Senado Federal'},
+    {t:'PEC 18/2025: Polícias Científicas', p:'A CCJ aprovou o parecer. A PEC saiu da pauta do Plenário, e a Emenda nº 60 do senador Dr. Hiran soma 18 de 27 assinaturas.', st:'ok', meta:'Quarta, 14/10 · CCJ do Senado'}
+  ];
+  $('#home-dest').innerHTML = dest.map(d=>`<article class="card"><div class="tag casa">${d.meta}</div><h3>${d.t}</h3><p class="t">${d.p}</p><div class="foot">${pill(d.st, d.st==='ok'?'Aprovado':'Realizado')}</div></article>`).join('');
+
+  $('#home-inf').innerHTML = INFORMES.slice(0,2).map(infCard).join('');
+}
+
+/* ---------- informes ---------- */
+const infState = {casa:'todas', q:''};
+function infCard(i){
+  const d = dataBR(i.data);
+  return `<button type="button" class="card click inf" data-go="informes" data-inf="${i.id}">
+    <div class="date"><b>${d.d}</b><span>${d.m} ${d.y}</span></div>
+    <div><div class="tag casa">${CASA[i.casa]} · ${i.tema}</div><h3>${i.titulo}</h3><p class="t">${i.lide}</p></div></button>`;
+}
+function renderInformes(){
+  const q = norm(infState.q);
+  const itens = INFORMES.filter(i => (infState.casa==='todas'||i.casa===infState.casa) && (!q || norm(i.titulo+' '+i.lide+' '+i.tema).includes(q)))
+    .sort((a,b)=>b.data.localeCompare(a.data));
+  $('#inf-items').innerHTML = itens.length ? itens.map(infCard).join('') : '<div class="vazio">Nenhum informe encontrado.</div>';
+  $$('#inf-items .inf').forEach(b=>b.onclick=()=>openInforme(b.dataset.inf));
+}
+function openInforme(id){
+  const i = INFORMES.find(x=>x.id===id); if(!i) return;
+  const d = dataBR(i.data);
+  const bl = i.blocos.map(b=>`<h3>${b.h}</h3>` + (b.p||[]).map(p=>`<p>${p}</p>`).join('')
+    + (b.lista?`<ul>${b.lista.map(l=>{const k=l.indexOf(':');return `<li><b>${l.slice(0,k+1)}</b>${l.slice(k+1)}</li>`}).join('')}</ul>`:'')
+    + (b.tabela?`<div class="tbl"><table><thead><tr><th>Dispositivo</th><th>Conteúdo</th></tr></thead><tbody>${b.tabela.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table></div>`:'')).join('');
+  const el = $('#inf-leitura');
+  el.innerHTML = `<button class="chip back" type="button" id="inf-back">← Todos os informes</button>
+    <article class="reader"><div class="tag casa">Informe FPMed · ${CASA[i.casa]} · ${i.tema}</div>
+      <h2 style="margin-top:10px">${i.titulo}</h2><p class="lead">${i.lide}</p>${bl}
+      <div class="btnrow"><a class="btn" href="${i.pdf}" target="_blank" rel="noopener">Abrir PDF original</a></div>
+      <div class="sign">Frente Parlamentar Mista da Medicina — FPMed · Instituto Brasil de Medicina — IBDM · ${d.full}</div></article>`;
+  $('#inf-lista').hidden = true; el.hidden = false;
+  $('#inf-back').onclick = () => { el.hidden = true; $('#inf-lista').hidden = false; window.scrollTo(0,0); };
+  window.scrollTo(0,0);
+}
+
+/* ---------- membros ---------- */
+const memState = {tipo:'todos', casa:'', partido:'', uf:'', q:''};
+function fillSelect(sel, label, vals){ sel.innerHTML = `<option value="">${label}</option>` + [...new Set(vals)].sort().map(v=>`<option>${v}</option>`).join(''); }
+function renderMembros(){
+  const q = norm(memState.q);
+  const lista = MEMBROS.filter(m => (memState.tipo==='todos'||m.vinculo===memState.tipo) && (!memState.casa||m.casa===memState.casa)
+    && (!memState.partido||m.partido===memState.partido) && (!memState.uf||m.uf===memState.uf) && (!q||norm(m.nome).includes(q)))
+    .sort((a,b)=> (b.vinculo==='membro')-(a.vinculo==='membro') || a.nome.localeCompare(b.nome,'pt'));
+  $('#mem-grid').innerHTML = lista.length ? lista.map(m=>`<button type="button" class="card mem ${m.cargo?'pres':''}" data-n="${MEMBROS.indexOf(m)}">
+    <div class="av" aria-hidden="true">${initials(m.nome)}</div>
+    <div style="min-width:0"><h3>${m.nome}</h3><div class="pt">${m.casa==='Senado'?'Sen.':'Dep.'} · ${m.partido}/${m.uf}</div>
+    <div class="ro">${m.cargo?`<b>${m.cargo}.</b> `:''}${m.papel}</div>
+    ${m.vinculo==='membro'?pill('ok',m.cargo?'Presidência':'Membro'):pill('neutral','Citado nos materiais')}</div></button>`).join('')
+    : '<div class="vazio" style="grid-column:1/-1">Nenhum parlamentar com esses filtros.</div>';
+  $$('#mem-grid .mem').forEach(b=>b.onclick=()=>openPerfil(+b.dataset.n));
+}
+function openPerfil(i){
+  const m = MEMBROS[i], el = $('#mem-perfil');
+  const campo = (k,v) => `<dt>${k}</dt><dd>${v||NF}</dd>`;
+  const redes = (m.redes&&m.redes.length) ? m.redes.map(r=>`<a href="${r[1]}" target="_blank" rel="noopener">${r[0]}</a>`).join(' · ') : '';
+  const areas = (m.areas&&m.areas.length) ? `<div class="areas">${m.areas.map((a,k)=>`<span class="area a${(k%5)+1}">${a}</span>`).join('')}</div>` : '';
+  const bio = (m.bio&&m.bio.length) ? `<div class="bio">${m.bio.map(p=>`<p>${p}</p>`).join('')}</div>` : `<p class="atua" style="color:var(--muted)">Minibiografia ainda não cadastrada.</p>`;
+  el.innerHTML = `<button type="button" class="chip back" id="mem-back">← Parlamentares</button>
+    <div class="perfil">
+      <div class="foto" aria-hidden="${m.foto?'false':'true'}">${m.foto?`<img src="${m.foto}" alt="${m.nome}">`:initials(m.nome)}</div>
+      <div style="min-width:0">
+        <h2>${m.nome}</h2><div class="dots-bar"></div>
+        <div class="pchips"><span class="pchip main">${m.partido}/${m.uf}</span><span class="pchip">${m.casa==='Senado'?'Senado Federal':'Câmara dos Deputados'}</span>${m.eleitoEm?`<span class="pchip">Eleito em ${m.eleitoEm}</span>`:''}${m.cargo?`<span class="pchip">${m.cargo}</span>`:''}</div>
+        <dl class="campos">${campo('Naturalidade',m.naturalidade)}${campo('Formação',m.formacao)}${campo('Ocupação',m.ocupacao)}${campo('Cargos políticos',m.cargos)}${campo('Áreas temáticas',areas)}${campo('Redes',redes)}</dl>
+      </div>
+    </div>
+    <div class="perfil" style="margin-top:0"><div></div><div style="min-width:0">
+      <h3 class="bio-h">Minibiografia</h3>${bio}
+      <h3 class="bio-h">Nos materiais da FPMed</h3><p class="atua">${m.papel}</p>
+    </div></div>`;
+  $('#mem-lista').hidden = true; el.hidden = false;
+  $('#mem-back').onclick = () => { el.hidden = true; $('#mem-lista').hidden = false; window.scrollTo(0,0); };
+  window.scrollTo(0,0);
+}
+
+/* ---------- inicialização ---------- */
+chipGroup($('#ag-casa'), [['todas','Todas as casas'],['camara','Câmara'],['senado','Senado'],['congresso','Congresso']], 'todas', v=>{state.casa=v; renderAgenda();});
+$('#m-previa').onclick = ()=>{state.modo='previa'; renderAgenda();};
+$('#m-sintese').onclick = ()=>{state.modo='sintese'; renderAgenda();};
+$('#ag-q').oninput = e=>{state.q=e.target.value; renderAgenda();};
+chipGroup($('#inf-casa'), [['todas','Todos'],['camara','Câmara'],['senado','Senado']], 'todas', v=>{infState.casa=v; renderInformes();});
+$('#inf-q').oninput = e=>{infState.q=e.target.value; renderInformes();};
+chipGroup($('#mem-tipo'), [['todos','Todos'],['membro','Membros'],['citado','Citados nos materiais']], 'todos', v=>{memState.tipo=v; renderMembros();});
+fillSelect($('#mem-partido'),'Todos os partidos',MEMBROS.map(m=>m.partido));
+fillSelect($('#mem-uf'),'Todas as UFs',MEMBROS.map(m=>m.uf));
+$('#mem-q').oninput = e=>{memState.q=e.target.value; renderMembros();};
+$('#mem-casa').onchange = e=>{memState.casa=e.target.value; renderMembros();};
+$('#mem-partido').onchange = e=>{memState.partido=e.target.value; renderMembros();};
+$('#mem-uf').onchange = e=>{memState.uf=e.target.value; renderMembros();};
+
+renderHome(); renderWeeks(); renderAgenda(); renderInformes(); renderMembros(); route();
+</script>
+
+</body>
+</html>
