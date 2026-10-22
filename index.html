@@ -42,7 +42,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .nav::-webkit-scrollbar{display:none}
 .nav a{white-space:nowrap;text-decoration:none;color:var(--muted);font-weight:600;font-size:13px;padding:10px 14px;border-radius:8px;border-bottom:3px solid transparent}
 .nav a:hover{color:var(--fg);background:var(--surface-2)}
+.nav a.ext{margin-left:8px;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:12.5px}
+.nav a.ext:hover{border-color:var(--brand);color:var(--brand)}
+.nav a.ext+a.ext{margin-left:0}
 .nav a[aria-current="page"]{color:var(--brand);border-bottom-color:var(--lime);border-radius:8px 8px 0 0}
+@media (max-width:1180px){.brand span{display:none}}
 @media (max-width:760px){
   .top .wrap{flex-wrap:wrap;gap:0;padding-top:10px}
   .brand span{display:none}
@@ -253,6 +257,8 @@ body{margin:0}[hidden]{display:none!important}img{max-width:100%}
       <a href="#agendas" data-v="agendas">Agendas e Sínteses</a>
       <a href="#informes" data-v="informes">Informes</a>
       <a href="#membros" data-v="membros">Membros</a>
+      <a class="ext" href="https://fpmedicina.org.br/quem-somos/" target="_blank" rel="noopener">Site da FPMed ↗</a>
+      <a class="ext" href="https://www.instagram.com/fpmedicina/" target="_blank" rel="noopener">Instagram ↗</a>
     </nav>
   </div>
 </header>
@@ -362,6 +368,7 @@ body{margin:0}[hidden]{display:none!important}img{max-width:100%}
 <footer>
   <div class="wrap">
     <div><b>Frente Parlamentar Mista da Medicina — FPMed</b><br>Instituto Brasil de Medicina — IBDM</div>
+    <div><b>Siga a FPMed</b><br><a href="https://fpmedicina.org.br/quem-somos/" target="_blank" rel="noopener">fpmedicina.org.br</a> · <a href="https://www.instagram.com/fpmedicina/" target="_blank" rel="noopener">@fpmedicina</a></div>
     <div>(61) 98595.3887 · fpmedicina@fpmedicina.org.br<br>SCES Trecho 3, Conjunto 6, Prédio AMBr, Sala 205</div>
   </div>
 </footer>
