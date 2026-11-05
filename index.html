@@ -1073,6 +1073,16 @@ $('#mem-q').oninput = e=>{memState.q=e.target.value; renderMembros();};
 $('#mem-casa').onchange = e=>{memState.casa=e.target.value; renderMembros();};
 $('#mem-partido').onchange = e=>{memState.partido=e.target.value; renderMembros();};
 $('#mem-uf').onchange = e=>syncUF(e.target.value);
+/* clique em área vazia do quadro do mapa volta aos filtros padrão */
+function limparFiltros(){
+  memState.q = ''; memState.casa = ''; memState.partido = ''; memState.uf = '';
+  $('#mem-q').value = ''; $('#mem-casa').value = ''; $('#mem-partido').value = ''; $('#mem-uf').value = '';
+  renderMembros(); renderMapa();
+}
+$('.mapa').addEventListener('click', e => {
+  if(e.target.closest('.uf, .rank-row')) return;
+  if(memState.q || memState.casa || memState.partido || memState.uf) limparFiltros();
+});
 
 renderHome(); renderWeeks(); renderAgenda(); renderInformes(); renderMembros(); renderMapa(); route();
 </script>
