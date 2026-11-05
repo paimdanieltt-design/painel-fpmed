@@ -83,7 +83,7 @@ section.blk:first-child{margin-top:0}
 .day .dl{font-size:12px;color:var(--muted);line-height:1.4}
 .day .dots{display:flex;gap:4px;margin-top:auto;padding-top:8px;flex-wrap:wrap}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--neutral)}
-.dot.ok{background:var(--ok)}.dot.canc,.dot.ret{background:var(--warn)}.dot.parc,.dot.info{background:var(--info)}
+.dot.ok{background:var(--ok)}.dot.canc,.dot.ret,.dot.nd{background:var(--warn)}.dot.parc,.dot.info{background:var(--info)}
 .day.off{background:var(--surface-2);border-style:dashed}
 .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
@@ -108,7 +108,7 @@ section.blk:first-child{margin-top:0}
 .pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.02em;white-space:nowrap}
 .pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 .pill.ok{background:var(--ok-bg);color:var(--ok)}
-.pill.canc,.pill.ret{background:var(--warn-bg);color:var(--warn)}
+.pill.canc,.pill.ret,.pill.nd{background:var(--warn-bg);color:var(--warn)}
 .pill.parc,.pill.info,.pill.fav{background:var(--info-bg);color:var(--info)}
 .pill.acomp,.pill.neutral{background:var(--neutral-bg);color:var(--neutral)}
 .tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -181,11 +181,21 @@ select.search{flex:0 0 auto;cursor:pointer}
 .res{margin-top:12px;border-radius:8px;padding:10px 14px;font-size:13px;background:var(--neutral-bg)}
 .res b{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
 .res.ok{background:var(--ok-bg)}.res.ok b{color:var(--ok)}
-.res.canc,.res.ret{background:var(--warn-bg)}.res.canc b,.res.ret b{color:var(--warn)}
+.res.canc,.res.ret,.res.nd{background:var(--warn-bg)}.res.canc b,.res.ret b,.res.nd b{color:var(--warn)}
 .res.parc,.res.info{background:var(--info-bg)}.res.parc b,.res.info b{color:var(--info)}
 .nota{margin-top:10px;font-size:12.5px;color:var(--muted);border-left:3px solid var(--lime);padding-left:12px}
 @media (max-width:560px){.it{grid-template-columns:1fr;gap:8px}.it-time{display:flex;gap:10px;align-items:baseline}}
 
+/* agenda agrupada por órgão */
+.grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-top:12px;overflow:hidden}
+.grp-h{display:flex;gap:6px 12px;flex-wrap:wrap;align-items:baseline;padding:12px 18px;background:var(--surface-2)}
+.grp-h b{font-size:17px;font-weight:800;color:var(--brand);white-space:nowrap}
+.grp-l{font-size:12.5px;color:var(--fg);font-weight:600;min-width:0;flex:1 1 240px}
+.it{display:block;background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;margin:0;padding:16px 18px}
+.grp-h+.it{border-top:0}
+.it-top{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.it h4{margin:0}
+.dots small{font-size:11px;font-weight:600;color:var(--muted);margin-left:2px;align-self:center}
 /* leitura de informe */
 .reader{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(18px,4vw,36px)}
 .reader h2{font-size:clamp(21px,3vw,28px);max-width:30ch}
@@ -281,6 +291,11 @@ body{margin:0}[hidden]{display:none!important}img{max-width:100%}
       <div class="legend" id="home-legend"></div>
     </section>
 
+    <section class="blk" id="sec-dest-atual">
+      <div class="sec-h"><h2 id="h-dest-atual"></h2><span class="sub" id="home-dest-atual-sub"></span></div>
+      <div class="dest" id="home-dest-atual"></div>
+    </section>
+
     <section class="blk" id="sec-numeros">
       <div class="sec-h"><h2>A semana em números</h2><span class="sub" id="home-num-sub"></span></div>
       <div class="stats" id="home-stats"></div>
@@ -351,7 +366,7 @@ body{margin:0}[hidden]{display:none!important}img{max-width:100%}
   </div></div>
   <main class="wrap">
     <div id="mem-lista">
-    <div class="aviso"><b>Lista em construção.</b> Por enquanto só consta a presidência. Os demais nomes aparecem como citados nos materiais e não indicam filiação à Frente.</div>
+    <div class="aviso"><b>Lista em construção.</b> Constam os nomes com vínculo informado nos materiais (presidência, vice-presidência e membros atuantes). Os demais nomes aparecem como citados nos materiais e não indicam filiação à Frente.</div>
     <div class="ctrls">
       <input class="search" id="mem-q" type="search" placeholder="Buscar por nome" aria-label="Buscar parlamentar">
       <select class="search" id="mem-casa" aria-label="Casa"><option value="">Câmara e Senado</option><option>Câmara</option><option>Senado</option></select>
@@ -376,8 +391,9 @@ body{margin:0}[hidden]{display:none!important}img{max-width:100%}
 <script>
 /* ---------- dados ---------- */
 const CASA = {camara:'Câmara dos Deputados', senado:'Senado Federal', congresso:'Congresso Nacional'};
-const STATUS = {ok:'Aprovado', canc:'Reunião cancelada', ret:'Retirado de pauta', parc:'Apreciação parcial', info:'Realizado'};
-const POS = {acomp:'Acompanhar', fav:'Favorável', inst:'Posição institucional'};
+const STATUS = {ok:'Aprovado', canc:'Reunião cancelada', ret:'Retirado de pauta', nd:'Não deliberado', parc:'Apreciação parcial', info:'Realizado'};
+const POS = {acomp:'Acompanhar', fav:'Favorável', ret:'Retirar de pauta', inst:'Posição institucional'};
+const POSCLS = {acomp:'acomp', fav:'fav', ret:'ret', inst:'acomp'};
 
 const PROFIMED = 'favorável à aprovação de texto nos moldes do último relatório apresentado pelo Sen. Dr. Hiran ao PL 2294/2024, PROFIMED.';
 const MPV_EMENTA = 'Altera a Lei nº 12.871/2013, a Lei nº 3.268/1957, a Lei nº 6.932/1981, a Lei nº 13.959/2019 e a Lei nº 10.861/2004 para dispor sobre o Exame Nacional de Avaliação da Formação Médica (ENAMED).';
@@ -385,7 +401,7 @@ const PEC221 = 'Altera o art. 7º da Constituição Federal para reduzir a dura�
 
 const SEMANAS = [{
   id:'2026-10-19', titulo:'19 a 23 de outubro de 2026', curto:'19 a 23 out 2026',
-  pdfAgenda:'docs/agenda-2026-10-19.pdf', pdfSintese:null,
+  pdfAgenda:'docs/agenda-2026-10-19.pdf', pdfSintese:'docs/sintese-2026-10-19.pdf',
   previa:{
     contagem:[['0','proposições para monitoramento'],['0','na Câmara dos Deputados'],['0','no Senado Federal'],['0','na Comissão Mista do Congresso']],
     eventos:'',
@@ -393,7 +409,13 @@ const SEMANAS = [{
       'A semana conta com baixa movimentação legislativa, com o segundo turno das eleições presidenciais previsto para domingo (25). Nesse contexto, o cenário é de redução das atividades, das sessões deliberativas e reuniões de comissão.',
       'A FPMed mantém a observação com cautela para eventuais mudanças e inclusões de pauta de interesse da representação médica.'
     ]},
-  sintese:null,
+  sintese:{
+    contagem:[['0','proposições para monitoramento'],['0','na Câmara dos Deputados'],['0','no Senado Federal'],['0','na Comissão Mista do Congresso']],
+    eventos:'',
+    resumo:[
+      'A semana foi marcada por baixa movimentação legislativa, sem registros de atividades relevantes no período. O cenário foi de redução das atividades parlamentares, sem sessões deliberativas ou reuniões de comissão de destaque, em meio à proximidade do segundo turno das eleições presidenciais, previsto para domingo (25).',
+      'A FPMed mantém a observação com cautela para eventuais mudanças e inclusões de pauta de interesse da representação médica.'
+    ]},
   dias:[
     {id:'seg', nome:'Segunda-feira', data:'19/10', rotulo:'Sem itens', vazioPrevia:'Sem itens de interesse em pauta.', itens:[]},
     {id:'ter', nome:'Terça-feira', data:'20/10', rotulo:'Sem itens', vazioPrevia:'Sem itens de interesse em pauta.', itens:[]},
@@ -456,6 +478,186 @@ const SEMANAS = [{
   ]
 }];
 
+/* Atalho para montar itens da agenda. Campos extras: status, resultado, modo ('previa' ou 'sintese'), nota, notaPrevia, notaSintese, posTxt, destaque, mostraRes. */
+function I(casa, hora, local, tipo, sigla, ementa, autoria, relatoria, pos, extra){
+  return Object.assign({casa, hora, local, tipo, sigla, ementa, autoria, relatoria, pos}, extra || {});
+}
+const L_CSAUDE = 'Comissão de Saúde (Câmara) · Anexo II, Plenário 07';
+const L_AMAZ = 'Comissão da Amazônia e dos Povos Originários e Tradicionais (Câmara) · Anexo II, Plenário 12';
+const L_CE = 'Comissão de Educação (Câmara) · Anexo II, Plenário 10';
+const L_CFT = 'Comissão de Finanças e Tributação (Câmara) · Anexo II, Plenário 04';
+const L_CPASIAF = 'Comissão de Previdência, Assistência Social, Infância, Adolescência e Família (Câmara) · Anexo II, Plenário 07';
+const L_CCJC = 'Comissão de Constituição e Justiça e de Cidadania (Câmara) · Anexo II, Plenário 1';
+const L_CTFC = 'Comissão de Transparência, Governança, Fiscalização e Controle e Defesa do Consumidor (Senado) · Anexo II, Ala Senador Nilo Coelho, Plenário nº 6';
+const DELIB = 'Reunião deliberativa';
+const VOT = 'Discussão e votação';
+
+/* ---------- 26 a 30 de outubro de 2026 ---------- */
+const W2630 = {
+  id:'2026-10-26', titulo:'26 a 30 de outubro de 2026', curto:'26 a 30 out 2026',
+  pdfAgenda:'docs/agenda-2026-10-26.pdf', pdfSintese:'docs/sintese-2026-10-26.pdf',
+  previa:{
+    contagem:[['10','proposições para monitoramento'],['5','na Câmara dos Deputados'],['5','no Senado Federal'],['0','na Comissão Mista do Congresso']],
+    eventos:'Audiência pública na Comissão de Saúde da Câmara, terça-feira (27/10), às 17h, sobre a regulamentação e a implementação da avaliação biopsicossocial no Brasil, diante da sanção da Lei nº 15.439/2026 (origem: PL 5.868/2025).',
+    resumo:[
+      'A semana legislativa será marcada pela retomada das atividades no Congresso Nacional após o segundo turno das eleições de 2026, com a concentração das pautas de interesse da representação médica na quarta-feira (28). O período de transição pós-eleitoral poderá influenciar o ritmo das deliberações e das articulações parlamentares.',
+      'A agenda da FPMed contempla 10 proposições legislativas e audiências públicas, com destaque para temas relacionados às condições de trabalho médico, à assistência à saúde e à proteção de pacientes.',
+      'Na Câmara, destaca-se a audiência pública de terça-feira (27) sobre a regulamentação da avaliação biopsicossocial para pessoas com diabetes, além da apreciação de proposições sobre violência obstétrica e ginecológica (PL 2.373/2023), promoção da saúde mental e atendimento prioritário de crianças e adolescentes. No Senado, a Comissão de Direitos Humanos analisará matérias sobre saúde mental da população idosa, reconhecimento da síndrome de Tourette como deficiência, acesso à analgesia durante o parto e intervenções médicas em crianças e adolescentes.',
+      'A FPMed manterá o acompanhamento das deliberações e das possíveis alterações de pauta, com atenção às proposições com repercussões sobre a prática profissional, a autonomia médica e a qualidade da assistência à população.'
+    ]},
+  sintese:{
+    contagem:[['28','proposições para monitoramento'],['28','na Câmara dos Deputados'],['0','no Senado Federal'],['8','requerimentos de interesse pautados']],
+    eventos:'Audiência pública na Comissão de Saúde da Câmara, terça-feira (27/10), sobre a regulamentação da avaliação biopsicossocial para pessoas com diabetes tipo 1, prevista na Lei nº 15.439/2026.',
+    destaques:[
+      {t:'Audiência pública sobre avaliação biopsicossocial no diabetes tipo 1', p:'A Comissão de Saúde debateu a regulamentação prevista na Lei nº 15.439/2026. A deputada Flávia Morais pediu ao Ministério da Saúde uma estimativa dos recursos para capacitar avaliadores.', st:'info', lab:'Realizada', meta:'Terça, 27/10 · Comissão de Saúde da Câmara'},
+      {t:'PL 2.373/2023: violência obstétrica não foi deliberado', p:'A relatora, deputada Rogéria Santos, estava ausente. Seu parecer nº 14 acolhe a proposta do CFM e retira a criminalização específica do ato médico.', st:'nd', lab:'Não deliberado', meta:'Quarta, 28/10 · Comissão de Previdência da Câmara'},
+      {t:'Audiência sobre inadimplência da remuneração médica (PL 3.022/2026)', p:'A Comissão de Saúde aprovou, com alterações, a audiência pública que antecede um possível substitutivo. É uma oportunidade para a FPMed contribuir com uma solução juridicamente segura.', st:'ok', lab:'Aprovado', meta:'Quarta, 28/10 · Comissão de Saúde da Câmara'},
+      {t:'Urgência para o Dia Nacional do Autocuidado (PL 3.099/2019)', p:'O Plenário da Câmara aprovou o regime de urgência urgentíssima para apreciar o substitutivo do Senado ao projeto, de autoria de Antonio Brito, Flávia Morais e Juninho do Pneu.', st:'ok', lab:'Aprovado', meta:'Quarta, 28/10 · Plenário da Câmara'}
+    ],
+    resumo:[
+      'A agenda de monitoramento da FPMed contemplou 28 proposições legislativas, uma audiência pública e 8 requerimentos de interesse, com destaque para temas relacionados ao exercício profissional médico, à assistência à saúde e à proteção dos pacientes.',
+      'Na Câmara dos Deputados, destacou-se a audiência pública de terça-feira (27) sobre a regulamentação da avaliação biopsicossocial para pessoas com diabetes tipo 1. O debate evidenciou divergências quanto aos critérios de reconhecimento da deficiência e à demora na implementação do instrumento. Também estava prevista a apreciação do PL 2.373/2023, sobre violência institucional contra a mulher na assistência à gestação, ao parto e ao puerpério, que não foi deliberado por ausência da relatora.',
+      'Na quarta-feira (28), a Comissão de Saúde aprovou a realização de audiência pública sobre o PL 3.022/2026, que trata da inadimplência da remuneração médica. A iniciativa antecede a possível apresentação de um substitutivo e representa uma oportunidade estratégica para a FPMed contribuir com a construção de uma solução juridicamente segura.',
+      'O encerramento da semana sinaliza a recuperação progressiva do ritmo legislativo, embora o cenário pós-eleitoral ainda influencie as deliberações. A expectativa é de intensificação das negociações e reorganização das prioridades nas próximas semanas, diante da proximidade do fim da legislatura e das discussões orçamentárias para 2027.'
+    ]},
+  dias:[
+    {id:'seg', nome:'Segunda-feira', data:'26/10', rotulo:'Sem itens', vazioPrevia:'Sem itens de interesse em pauta.', itens:[]},
+    {id:'ter', nome:'Terça-feira', data:'27/10', rotulo:'Audiência pública', itens:[
+      I('camara','13h55','Plenário da Câmara dos Deputados','Sessão deliberativa extraordinária semipresencial','PL 5239/2025','Dispõe sobre a viabilização da primeira consulta ginecológica a partir dos 10 anos de idade no âmbito do SUS, visando à promoção da saúde reprodutiva e preventiva de meninas.','Adriana Ventura (NOVO-SP) e Greyce Elias (AVANTE-MG)','Flávia Morais (MDB-GO)',null,{modo:'sintese',status:'ok',resultado:'Aprovado o parecer da relatora pela aprovação com substitutivo.'}),
+      I('camara','14h',L_AMAZ,VOT,'PL 2236/2025','Dispõe sobre o reconhecimento, valorização e estímulo à atuação das parteiras tradicionais da Amazônia Legal nas políticas públicas de saúde, no âmbito do SUS.','Meire Serafim (UNIÃO-AC)','Juliana Cardoso (PT-SP)',null,{modo:'sintese',status:'ret',resultado:'Retirado de pauta a pedido da relatora.'}),
+      I('camara','14h',L_AMAZ,VOT,'PL 1956/2026','Institui o Programa Nacional de Prevenção, Controle e Eliminação da Malária (PNCEM) como política permanente de saúde de Estado.','Dorinaldo Malafaia (PDT-AP)','Chico Alencar (PSOL-RJ)',null,{modo:'sintese',status:'ok',resultado:'Aprovado o parecer do relator pela aprovação com substitutivo.'}),
+      I('camara','14h','Comissão de Segurança Pública e Combate ao Crime Organizado (Câmara) · Anexo II, Plenário 06',VOT,'PL 2954/2026','Altera a Lei nº 11.350/2006 para estabelecer protocolos de prevenção e proteção à violência contra os Agentes Comunitários de Saúde e os Agentes de Combate às Endemias.','Merlong Solano (PT-PI)','Messias Donato (UNIÃO-ES)',null,{modo:'sintese',status:'ret',resultado:'Retirado de pauta, por ausência do relator.'}),
+      I('camara','15h','Comissão de Indústria, Comércio e Serviços (Câmara) · Anexo II, Plenário 05',VOT,'PLP 124/2024','Altera a Lei Complementar nº 182/2021 (Marco Legal das Startups) para incluir medidas de inclusão de pessoas com deficiência, autistas e neurodivergentes, incentivar a inovação no setor de saúde pública e valorizar a região amazônica.','Amom Mandel (CIDADANIA-AM)','Daniel Agrobom (PSD-GO)',null,{modo:'sintese',status:'ok',resultado:'Aprovado o parecer do relator pela aprovação com substitutivo.'}),
+      I('camara','17h',L_CSAUDE,'Audiência pública','Avaliação biopsicossocial e diabetes','Regulamentação da avaliação biopsicossocial para pessoas com diabetes. Requerimento relacionado: REQ 166/2026 CSAUDE, da Deputada Flávia Morais.',null,null,null,{modo:'previa',destaque:true,nota:'Convidados: Karla Melo Fagundes (SBD, participação remota); Roberto Paulo do Vale Tiné (presidente do CONADE, participação remota); representantes do Ministério dos Direitos Humanos e da Cidadania, do Ministério da Saúde e do INSS; especialista em avaliação biopsicossocial e funcionalidade.'}),
+      I('camara','17h',L_CSAUDE,'Audiência pública','Avaliação biopsicossocial e diabetes','Regulamentação da avaliação biopsicossocial para pessoas com diabetes. Requerimento relacionado: REQ 166/2026 CSAUDE, da Deputada Flávia Morais.',null,null,null,{modo:'sintese',destaque:true,status:'info',nota:'Participantes: dep. Flávia Morais (MDB/GO), autora do requerimento e presidente da audiência; representantes da SBD, da ANAPcD, do CONADE, do Ministério da Previdência Social, do MDHC, do Ministério da Saúde, da ANFIBRO, da SEJUS, da Associação Nacional dos Analistas do Seguro Social, do Instituto Diabetes Brasil e da ADJ Diabetes Brasil, além da prefeita e da secretária de Saúde de Taquaral de Goiás (GO).',resultado:'A audiência, presidida pela deputada Flávia Morais, debateu a regulamentação da avaliação biopsicossocial para pessoas com diabetes tipo 1, prevista na Lei nº 15.439/2026. A SBD e entidades de defesa das pessoas com deficiência defenderam a implementação urgente do instrumento. O CONADE reforçou a necessidade de critérios uniformes, e o Governo Federal apontou avanços na capacitação de avaliadores. Ao final, a deputada determinou que a Comissão solicite ao Ministério da Saúde uma estimativa dos recursos para capacitar os profissionais, com vistas a prever o valor no Orçamento.'})
+    ]},
+    {id:'qua', nome:'Quarta-feira', data:'28/10', rotulo:'Comissões', itens:[
+      I('camara','9h30',L_CSAUDE,'Requerimentos','REQ 192/2026 CSAUDE','Requer ao Ministério da Saúde informações atualizadas sobre as políticas, ações e serviços destinados às mulheres no climatério e na menopausa.','Geraldo Resende (UNIÃO-MS) e Silvia Cristina (PP-RO)',null,null,{modo:'sintese',status:'ok',resultado:'Aprovado.'}),
+      I('camara','9h30',L_CSAUDE,'Requerimentos','REQ 193/2026 CSAUDE','Requer aditamento ao REQ 186/2026 para incluir representante do CFM na audiência pública sobre os aspectos científicos, regulatórios, tecnológicos e sanitários dos medicamentos à base de tirzepatida e seus impactos no acesso ao tratamento de obesidade e diabetes tipo 2.','Dr. Frederico (PL-MG)',null,null,{modo:'sintese',status:'ok',resultado:'Aprovado.'}),
+      I('camara','9h30',L_CSAUDE,'Requerimentos','REQ 194/2026 CSAUDE','Requer audiência pública sobre os impactos do reajuste dos preços de radioisótopos e radiofármacos pela CNEN e os riscos à continuidade e ao acesso aos serviços de Medicina Nuclear no SUS.','Beto Preto (PSD-PR)',null,null,{modo:'sintese',status:'ok',resultado:'Aprovado.'}),
+      I('camara','9h30',L_CSAUDE,'Requerimentos','REQ 195/2026 CSAUDE','Requer aditamento aos REQ 186/2026 e 193/2026 para inclusão de convidados na audiência pública sobre medicamentos à base de tirzepatida.','Rafael Fera (PODE-RO)',null,null,{modo:'sintese',status:'ok',resultado:'Aprovado.'}),
+      I('camara','9h30',L_CSAUDE,'Requerimentos','REQ 196/2026 CSAUDE','Requer aditamento ao REQ 33/2026 para incluir CONASS, CONASEMS e Saúde Digital Brasil na audiência pública sobre o Substitutivo ao PL 5.875/2013 e apensados.','Adriana Ventura (NOVO-SP)',null,null,{modo:'sintese',status:'ok',resultado:'Aprovado com alterações.'}),
+      I('camara','9h30',L_CSAUDE,'Requerimentos','REQ 197/2026 CSAUDE','Requer aditamento ao REQ 177/2026 para inclusão de convidado em audiência pública sobre a expansão da Telessaúde no Brasil.','Adriana Ventura (NOVO-SP)',null,null,{modo:'sintese',status:'ok',resultado:'Aprovado.'}),
+      I('camara','9h30',L_CSAUDE,'Requerimentos','REQ 198/2026 CSAUDE','Requer audiência pública para debater o PL 3.022/2026, que altera a Lei nº 3.268/1957 para prever medidas administrativas em caso de atraso ou inadimplemento remuneratório perante médicos.','Silvia Cristina (PP-RO)',null,null,{modo:'sintese',destaque:true,status:'ok',resultado:'Aprovado com alterações.'}),
+      I('camara','9h30',L_CSAUDE,VOT,'PL 4674/2024','Dispõe sobre a disponibilização de exames de ultrassonografia morfológica na rede pública de saúde.','Beto Preto (PSD-PR)','Rogéria Santos (REPUBLICANOS-BA)',null,{modo:'sintese',status:'nd',resultado:'Não deliberado.'}),
+      I('camara','9h30',L_CSAUDE,VOT,'PL 108/2011','Desonera dos tributos federais os medicamentos usados diretamente no tratamento do diabetes e da hipertensão arterial.','Sandes Júnior (PP-GO)','Flávia Morais (MDB-GO)',null,{modo:'sintese',status:'ok',resultado:'Aprovado o parecer da relatora pela aprovação com substitutivo.'}),
+      I('camara','9h30',L_CSAUDE,VOT,'PL 2902/2022','Institui a Semana Nacional em Defesa da Saúde Mental dos Profissionais de Segurança Pública.','Francisco Jr. (PSD-GO)','Flávia Morais (PDT-GO)',null,{modo:'sintese',status:'ok',resultado:'Aprovado o parecer da relatora pela aprovação com substitutivo.'}),
+      I('camara','9h30',L_CSAUDE,VOT,'PL 3210/2024','Dispõe sobre a incorporação do exame de sangue PrecivityAD no SUS para a detecção precoce da doença de Alzheimer.','Clodoaldo Magalhães (PV-PE)','Rogéria Santos (REPUBLICANOS-BA)',null,{modo:'sintese',status:'ret',resultado:'Retirado de pauta, de ofício, pelo Presidente.'}),
+      I('camara','9h30',L_CSAUDE,VOT,'PL 426/2025','Reconhece o trabalho das benzedeiras e dos benzedeiros como prática integrante da cultura popular brasileira e da Política Nacional de Educação Popular em Saúde no SUS.','Giovani Cherini (PL-RS)','Juliana Cardoso (PT-SP)',null,{modo:'sintese',status:'ok',resultado:'Aprovado o parecer da relatora pela aprovação com substitutivo.'}),
+      I('camara','9h30',L_CSAUDE,VOT,'PL 465/2025','Dispõe sobre a organização dos serviços de saúde para a realização de mamografia e citologia do colo do útero em mulheres com deficiência.','Ana Paula Lima (PT-SC)','Flávia Morais (MDB-GO)',null,{modo:'sintese',status:'ok',resultado:'Aprovado o parecer da relatora pela aprovação com substitutivo.'}),
+      I('camara','9h30',L_CSAUDE,VOT,'PL 1224/2025','Institui o “Março Verde”, a ser realizado anualmente em março.','Márcio Marinho (REPUBLICANOS-BA)','Carla Dickson (PL-RN)',null,{modo:'sintese',status:'ret',resultado:'Retirado de pauta, por ofício do Presidente.'}),
+      I('camara','9h30',L_CSAUDE,VOT,'PL 1428/2025','Institui o Programa Nacional de Acesso à Psicoterapia.','Daniel Agrobom (PL-GO)','Geraldo Resende (PSDB-MS)',null,{modo:'sintese',status:'ok',resultado:'Aprovado o parecer do relator pela aprovação com substitutivo.'}),
+      I('camara','9h30',L_CSAUDE,VOT,'PL 1682/2025','Institui o Programa Nacional de Saúde Bucal na Terceira Idade, com avaliação diagnóstica e planejamento terapêutico odontológico na admissão em clínicas geriátricas e instituições de longa permanência.','Marcos Tavares (PDT-RJ)','Geraldo Resende (UNIÃO-MS)',null,{modo:'sintese',status:'ok',resultado:'Aprovado o parecer do relator pela aprovação com substitutivo.'}),
+      I('camara','9h30',L_CSAUDE,VOT,'PL 3247/2025','Altera a Lei nº 11.350/2006 para dispor sobre as atividades de ACS e ACE em áreas de difícil acesso.','Sidney Leite (PSD-AM)','Silvia Cristina (PP-RO)',null,{modo:'sintese',status:'ok',resultado:'Aprovado o parecer da relatora pela aprovação com substitutivo.'}),
+      I('camara','9h30',L_CSAUDE,VOT,'PL 4269/2025','Dispõe sobre a realização periódica de exames de hemoglobina glicada, perfil lipídico e função renal no acompanhamento de pessoas com diabetes e doenças associadas no SUS.','Iza Arruda (MDB-PE)','Flávia Morais (MDB-GO)',null,{modo:'sintese',status:'ok',resultado:'Aprovado o parecer da relatora pela aprovação com substitutivo.'}),
+      I('camara','9h30',L_CSAUDE,VOT,'PL 5758/2025','Altera a Lei nº 11.976/2009 para obrigar os cartórios de registro civil a encaminhar às Secretarias de Saúde as informações das certidões de óbito e implantar sistema informatizado de compartilhamento.','Dr. Daniel Soranz (PSD-RJ)','Ana Pimentel (PT-MG)',null,{modo:'sintese',status:'ok',resultado:'Aprovado o parecer da relatora pela aprovação com substitutivo.'}),
+      I('camara','9h30',L_CSAUDE,VOT,'PL 1429/2026','Dispõe sobre atenção integral à saúde das pessoas com condições pós-covid no âmbito do SUS.','Giovani Cherini (PL-RS)','Geraldo Resende (UNIÃO-MS)',null,{modo:'sintese',status:'ok',resultado:'Aprovado o parecer do relator pela aprovação com substitutivo.'}),
+      I('camara','10h',L_CE,VOT,'PL 329/2025','Institui a Política Nacional de Promoção de Fatores de Proteção da Saúde Mental de Meninas.','Rosangela Moro (UNIÃO-SP)','Tabata Amaral (PSB-SP)','acomp',{status:'ok',resultado:'Aprovado o parecer da relatora pela aprovação com substitutivo.'}),
+      I('camara','10h',L_CE,VOT,'PL 3508/2025','Institui o Selo “Escola Amiga da Saúde Mental”, para reconhecer instituições de ensino que promovam ações de promoção da saúde mental da comunidade escolar.','Dr. Fernando Máximo (UNIÃO-RO)','AJ Albuquerque (PP-CE)',null,{modo:'sintese',status:'ret',resultado:'Retirado de pauta por ofício.'}),
+      I('camara','10h',L_CFT,VOT,'PL 1224/2019','Altera o Estatuto da Pessoa com Deficiência para prever acesso prioritário de crianças e adolescentes com deficiência a órteses, próteses e tecnologias assistivas necessárias à frequência e à aprendizagem escolares.','Senado Federal (Mara Gabrilli)','Laura Carneiro (PSD-RJ)',null,{modo:'sintese',status:'ret',resultado:'Retirado de pauta, de ofício, em razão da ausência da relatora.'}),
+      I('camara','10h',L_CFT,VOT,'PL 5422/2013','Acrescenta §§ 9º e 10 ao art. 15 da Lei nº 8.666/1993 para que bens adquiridos para o SUS sejam identificados de forma a impedir desvios e comercialização indevida.','Senado Federal (Vanessa Grazziotin)','Laura Carneiro (PSD-RJ)',null,{modo:'sintese',status:'ret',resultado:'Retirado de pauta, de ofício, em razão da ausência da relatora.'}),
+      I('camara','10h',L_CFT,VOT,'PL 665/2011','Dispõe sobre o acesso gratuito dos portadores de hiperplasia benigna ou câncer de próstata aos medicamentos que necessitam.','Hugo Leal (PSC-RJ)','Merlong Solano (PT-PI)',null,{modo:'sintese',status:'ok',resultado:'Parecer favorável ao PL 665/2011 e a quatro apensados, e contrário aos PLs 1.897/2011 e 2.766/2022.'}),
+      I('camara','10h',L_CFT,VOT,'PL 10813/2018','Institui o Programa Nacional de Prevenção à Gravidez Precoce.','Mariana Carvalho (PSDB-RO)','Laura Carneiro (PSD-RJ)',null,{modo:'sintese',status:'ret',resultado:'Retirado de pauta, de ofício, em razão da ausência da relatora.'}),
+      I('senado','11h','Comissão de Direitos Humanos (Senado) · Anexo II, Ala Senador Nilo Coelho, Plenário nº 2','Deliberação de matérias na CDH','PL 501/2023','Altera o Estatuto da Criança e do Adolescente para tipificar o crime de submissão de criança ou adolescente a intervenção cirúrgica ou a tratamento de transexualização.','Senador Magno Malta (PL/ES)','Senador Jorge Seif (PL/SC)','acomp',{modo:'previa'}),
+      I('senado','11h','Comissão de Direitos Humanos (Senado) · Anexo II, Ala Senador Nilo Coelho, Plenário nº 2','Deliberação de matérias na CDH','PL 4.767/2020','Classifica as pessoas com síndrome de Tourette como pessoas com deficiência.','Senador Nelsinho Trad (PSD/MS)','Senadora Damares Alves (REPUBLICANOS/DF)','acomp',{modo:'previa'}),
+      I('senado','11h','Comissão de Direitos Humanos (Senado) · Anexo II, Ala Senador Nilo Coelho, Plenário nº 2','Deliberação de matérias na CDH','PL 127/2024','Altera o Estatuto da Pessoa Idosa para dispor sobre programa de saúde mental direcionado à população idosa.','Deputado André Janones (REDE/MG)','Senadora Damares Alves (REPUBLICANOS/DF)','acomp',{modo:'previa'}),
+      I('senado','11h','Comissão de Direitos Humanos (Senado) · Anexo II, Ala Senador Nilo Coelho, Plenário nº 2','Deliberação de matérias na CDH','PL 1.257/2021','Altera o Estatuto da Pessoa Idosa para assegurar acesso a tecnologias de preservação da saúde mental e cognitiva da pessoa idosa.','Deputada Paula Belmonte (CIDADANIA/DF)','Senadora Roberta Acioly (REPUBLICANOS/RR)','acomp',{modo:'previa'}),
+      I('senado','11h','Comissão de Direitos Humanos (Senado) · Anexo II, Ala Senador Nilo Coelho, Plenário nº 2','Deliberação de matérias na CDH','PL 973/2026','Altera a Lei nº 11.634/2007 para ampliar o acesso à analgesia regional durante o trabalho de parto normal.','Senador Plínio Valério (PSDB/AM)','Senadora Roberta Acioly (REPUBLICANOS/RR)','acomp',{modo:'previa'}),
+      I('camara','13h30','Comissão de Cultura (Câmara) · Anexo II, Plenário 10',VOT,'PL 5.720/2019','Institui o dia 22 de novembro como Dia Nacional da Acupuntura/MTC e do Acupunturista.','Giovani Cherini (PL/RS)','Erika Kokay (PT/DF)','acomp',{status:'ok',resultado:'Aprovado o parecer da relatora pela aprovação com emendas.'}),
+      I('camara','13h30','Comissão de Cultura (Câmara) · Anexo II, Plenário 10',VOT,'PL 5.169/2025','Institui o Programa “Leitura que Cura”, com bibliotecas e espaços de leitura terapêutica em unidades do SUS, CAPS e hospitais públicos e filantrópicos conveniados.','Marcos Tavares (PDT/RJ)','Duda Salabert (PSOL/MG)','acomp',{status:'ok',resultado:'Aprovado o parecer da relatora pela aprovação com substitutivo.'}),
+      I('camara','14h',L_CPASIAF,VOT,'PL 2.373/2023','Dispõe sobre a Violência Obstétrica e Ginecológica na assistência à saúde da mulher nos serviços públicos e privados de saúde. Apensado: PL 6204/2025.','Laura Carneiro (PSD/RJ)','Rogéria Santos (REPUBLICANOS/BA)','acomp',{destaque:true,status:'nd',resultado:'Não deliberado por ausência da relatora.',notaSintese:'Observação FPMed: a relatora apresentou o Parecer nº 14, acolhendo integralmente a proposta do CFM. O novo substitutivo retira a criminalização específica do ato médico, preserva a autonomia profissional e direciona a responsabilização penal aos gestores responsáveis por falhas estruturais e institucionais na assistência obstétrica, o que representa avanço para a segurança jurídica da atuação médica.'}),
+      I('camara','14h',L_CPASIAF,VOT,'PL 4.731/2024','Altera o Estatuto da Criança e do Adolescente para dar prioridade de atendimento em unidades de saúde a crianças e adolescentes acompanhados por membro do Conselho Tutelar no exercício de suas funções.','Romero Rodrigues (PODE/PB)','Silvia Cristina (PP/RO)','acomp',{status:'ok',resultado:'Aprovado o parecer da relatora pela aprovação com substitutivo.'}),
+      I('camara','14h34','Plenário da Câmara dos Deputados','Sessão deliberativa extraordinária semipresencial','REQ 4194/2026','Requer regime de urgência urgentíssima para apreciar o Substitutivo do Senado ao PL 3.099/2019, que institui o Dia Nacional do Autocuidado e altera a Lei nº 8.080/1990 para estimular o autocuidado responsável no SUS.','Antonio Brito (PSD-BA), Flávia Morais (MDB-GO) e Juninho do Pneu (PSDB-RJ)',null,null,{modo:'sintese',destaque:true,status:'ok',resultado:'Aprovado.'})
+    ]},
+    {id:'qui', nome:'Quinta-feira', data:'29/10', rotulo:'Sem itens', vazioPrevia:'Sem itens de interesse em pauta.', itens:[]},
+    {id:'sex', nome:'Sexta-feira', data:'30/10', rotulo:'Sem itens', vazioPrevia:'Sem itens de interesse em pauta.', itens:[]}
+  ]
+};
+
+/* ---------- 2 a 6 de novembro de 2026 ---------- */
+const W0206 = {
+  id:'2026-11-02', titulo:'2 a 6 de novembro de 2026', curto:'2 a 6 nov 2026',
+  pdfAgenda:'docs/agenda-2026-11-02.pdf', pdfSintese:null,
+  previa:{
+    contagem:[['51','proposições para monitoramento'],['40','na Câmara dos Deputados'],['5','no Senado Federal'],['6','requerimentos']],
+    eventos:'Audiência pública na Comissão de Transparência, Governança, Fiscalização e Controle e Defesa do Consumidor do Senado, quarta-feira (04/11), após a reunião deliberativa das 14h, sobre as condições de trabalho dos profissionais de saúde, a atuação de cooperativas e organizações sociais e os riscos da contratação de serviços de saúde.',
+    destaques:[
+      {t:'PEC 18/2025 aprovada pelo Senado em dois turnos', p:'Segue à promulgação. A Emenda nº 89-PLEN, do senador Dr. Hiran e outros, reuniu 29 assinaturas e previa o reconhecimento das polícias científicas e a autonomia da perícia oficial, mas teve parecer contrário e não foi incorporada.', st:'ok', lab:'Aprovada', meta:'Terça, 03/11 · Plenário do Senado'},
+      {t:'Audiência sobre precarização do trabalho médico', p:'A CTFC debate contratos de saúde com cooperativas e organizações sociais, com participação de TCU, CGU, CFM, FENAM, SIMEC, SIMERS e MTE, a partir de requerimento do senador Dr. Hiran.', st:'info', lab:'Quarta, após as 14h', meta:'Quarta, 04/11 · CTFC do Senado'},
+      {t:'PL 2.373/2023: substitutivo sobre violência institucional na gestação e no parto', p:'A redação reflete as articulações do CFM com a relatora e protege a decisão médica fundamentada. A FPMed atuará pela preservação dos ajustes e pela responsabilização dos gestores.', st:'info', lab:'Em pauta', meta:'Quarta, 04/11 · 14h · Comissão de Previdência da Câmara'},
+      {t:'Comissão de Saúde: articulação para retirar três projetos de pauta', p:'Seguindo o CFM, a FPMed defende retirar os PLs 5.620/2023 (naturólogo), 2.099/2024 (telemedicina para gestantes) e 2.286/2025 (Saúde Itinerante para a Pessoa Idosa).', st:'ret', lab:'Retirar de pauta', meta:'Quarta, 04/11 · 9h30 · Comissão de Saúde da Câmara'}
+    ],
+    resumo:[
+      'A semana legislativa concentra pautas diretamente relacionadas à valorização da medicina e às condições do exercício profissional, com destaque para a proposta de audiência pública sobre a precarização do trabalho médico e para a apreciação do substitutivo ao PL 2.373/2023, sobre violência institucional na assistência à gestação, ao parto e ao puerpério, com proteção à decisão médica fundamentada e definição de responsabilidades dos gestores.',
+      'Na terça-feira (03), a PEC 18/2025 foi aprovada pelo Senado em dois turnos e segue à promulgação. A Emenda nº 89-PLEN, apresentada pelo senador Dr. Hiran (PP-RR), presidente da FPMed, e outros senadores, reuniu 29 assinaturas e contemplava o reconhecimento constitucional das polícias científicas e a autonomia da perícia oficial, mas recebeu parecer contrário. Em Plenário, o senador Dr. Hiran reforçou a articulação com a Presidência da Câmara para dar andamento à PEC 76/2019.',
+      'Na Comissão de Saúde, quarta-feira, às 9h30, a prioridade será articular a retirada de pauta dos PLs 5.620/2023, 2.099/2024 e 2.286/2025, que tratam, respectivamente, da regulamentação da profissão de naturólogo, da telemedicina para gestantes e do Programa Saúde Itinerante para a Pessoa Idosa. A orientação acompanha as manifestações do CFM.',
+      'Às 14h, na Comissão de Previdência, está prevista a apreciação do substitutivo ao PL 2.373/2023. No Senado, após a reunião deliberativa das 14h, a CTFC realizará audiência pública sobre contratos de saúde com cooperativas e organizações sociais e a precarização das relações de trabalho, com integrantes e entidades do IBDM: Dr. Levi Costa Carioca (SIMEC), Dr. Edmar Fernandes de Araújo Filho (FENAM) e representante do SIMERS.',
+      'Na Comissão de Legislação Participativa, às 14h, está pautado o REQ 73/2026, do deputado Dr. Frederico (PL-MG), com moção de pesar pelo falecimento do Dr. José Luiz Dantas Mestrinho, coordenador do IBDM por muitos anos e referência na defesa da medicina. A iniciativa conta com o apoio da FPMed.'
+    ]},
+  sintese:null,
+  dias:[
+    {id:'seg', nome:'Segunda-feira', data:'02/11', rotulo:'Feriado nacional', feriado:'Dia de Finados.', itens:[]},
+    {id:'ter', nome:'Terça-feira', data:'03/11', rotulo:'PEC 18/2025', itens:[
+      I('camara','13h','Comissão de Defesa dos Direitos das Pessoas com Deficiência (Câmara) · Anexo II, Plenário 13',DELIB,'REQ 43/2026 CPD','Solicita ao Ministro da Saúde informações sobre a decisão de não incorporar a vosoritida ao SUS para tratar a acondroplasia e os fundamentos do indeferimento do pedido de reconsideração e do não provimento do recurso administrativo.','Paulo Alexandre Barbosa (PSD-SP)',null,'acomp',{mostraRes:true,status:'nd',resultado:'Não apreciado.'}),
+      I('camara','13h','Comissão de Defesa dos Direitos das Pessoas com Deficiência (Câmara) · Anexo II, Plenário 13',DELIB,'PL 2622/2026','Institui a Política Nacional de Apoio e Proteção às Famílias Atípicas e cria o Auxílio Nacional de Apoio à Pessoa com Transtorno do Espectro Autista e outras deficiências que demandem cuidados permanentes. Prevê comprovação médica e multidisciplinar para a concessão do benefício e estimula centros multidisciplinares e a capacitação de profissionais de saúde.','Vanderlan Alves (SOLIDARI-CE)','Geraldo Resende (UNIÃO-MS)','acomp',{mostraRes:true,status:'nd',resultado:'Não apreciado.'}),
+      I('camara','14h',L_AMAZ,DELIB,'PL 2236/2025','Dispõe sobre o reconhecimento, valorização e estímulo à atuação das parteiras tradicionais da Amazônia Legal nas políticas públicas de saúde, no âmbito do SUS.','Meire Serafim (UNIÃO-AC)','Juliana Cardoso (PT-SP)','acomp',{posTxt:'Parecer da relatora pela aprovação.'}),
+      I('camara','14h',L_AMAZ,DELIB,'PL 5782/2023','Institui a campanha Setembro em Flor, destinada à conscientização sobre os tumores ginecológicos.','Renilce Nicodemos (MDB/PA)',null,'acomp',{mostraRes:true,status:'ok',resultado:'Aprovado.'}),
+      I('senado','14h / 16h','Plenário do Senado Federal','Sessão deliberativa · Ordem do Dia','PEC 18/2025','Altera os arts. 5º, 15, 22, 23, 24, 40, 49, 84, 103-B, 130-A e 144 da Constituição Federal e o art. 76 do ADCT; acrescenta os arts. 144-A e 144-B à Constituição e os arts. 139, 140 e 141 ao ADCT. Tema: segurança pública.','Poder Executivo',null,'fav',{destaque:true,posTxt:'favorável ao reconhecimento constitucional das polícias científicas e à autonomia da perícia oficial previstos na emenda.',mostraRes:true,status:'ok',resultado:'PEC aprovada em dois turnos e encaminhada à promulgação. A Emenda nº 89-PLEN, de interesse da ABRAMEL, não foi incorporada ao texto aprovado.'})
+    ]},
+    {id:'qua', nome:'Quarta-feira', data:'04/11', rotulo:'Audiência sobre trabalho médico', itens:[
+      I('camara','9h30',L_CSAUDE,'Requerimentos','REQ 200/2026','Requer, em aditamento ao REQ 94/2026 CSAUDE, a inclusão de convidado em audiência pública. O requerimento solicita a inclusão do Dr. Fernando Antônio Lucchese.','Giovani Cherini (PL-RS)',null,'acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PLP 127/2025','Altera a Lei Complementar nº 141/2012 para instituir critérios suplementares de financiamento das ações e serviços públicos de saúde nas regiões de fronteira internacional.','Tião Medeiros (PP-PR)','Silvia Cristina (PP-RO)','acomp',{posTxt:'Parecer da relatora pela aprovação.'}),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 4454/2019','Acrescenta dispositivo à Lei nº 8.080/1990 para garantir, pelo SUS, tratamento médico a pacientes com doenças não tratáveis no município de origem.','Marreca Filho (PATRIOTA-MA)','Rafael Simoes (UNIÃO-MG)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 5002/2020','Institui o Núcleo Especializado de Atendimento para as pessoas com deficiência no âmbito do SUS.','Léo Moraes (PODE-RO)','Amom Mandel (REPUBLIC-AM)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 5620/2023','Dispõe sobre a regulamentação da profissão de Naturólogo e institui o dia nacional do Naturólogo.','Reimont (PT-RJ)','Padre João (PT-MG)','ret',{destaque:true,posTxt:'Em alinhamento à manifestação do CFM, a FPMed defende o aprofundamento da discussão sobre a delimitação das atribuições dos naturólogos, a sobreposição de competências profissionais e, especialmente, a segurança dos pacientes.'}),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 6022/2023','Dispõe sobre o credenciamento de profissionais e de empresas da área de saúde para o atendimento de pacientes do SUS em nível ambulatorial.','Ronaldo Nogueira (REPUBLIC-RS)','Padre João (PT-MG)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 328/2024','Altera a Lei nº 8.080/1990 para regulamentar as referências no SUS.','Célio Silveira (MDB-GO)','Flávia Morais (PDT-GO)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 2099/2024','Institui o serviço de telemedicina para gestantes em áreas rurais e de difícil acesso.','Meire Serafim (UNIÃO-AC)','Ana Paula Lima (PT-SC)','ret',{destaque:true,posTxt:'Retirar de pauta, conforme orientação do CFM. A medida busca permitir a atualização da análise técnica sobre o substitutivo, especialmente quanto às garantias de atendimento presencial e à continuidade do acompanhamento das gestantes.'}),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 2644/2024','Dispõe sobre programa nacional de distribuição de pulseiras de identificação para idosos e pessoas com Alzheimer, Parkinson, epilepsia, TEA e outras condições de saúde.','Marcos Tavares (PDT-RJ)','Silvia Cristina (PP-RO)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 2837/2024','Inclui a racionalização no agendamento de consultas, exames e procedimentos entre os princípios do SUS.','Délio Pinheiro (PDT-MG)','Dr. Flávio (PL-RJ)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 2.286/2025','Institui o Programa Saúde Itinerante para a Pessoa Idosa, com atendimento domiciliar preventivo e continuado por profissionais de enfermagem do SUS.','Marcos Tavares (PDT-RJ)','Geraldo Resende (UNIÃO-MS)','ret',{destaque:true,posTxt:'Retirar de pauta, conforme orientação do CFM. Matéria em análise técnica, com necessidade de concluir a avaliação do projeto e da emenda apresentada pelo relator.'}),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 2815/2025','Assegura o acesso à criopreservação de óvulos para mulheres em tratamento oncológico com risco de perda da fertilidade, no SUS e nos planos privados.','Célio Silveira (MDB-GO)','Silvia Cristina (PP-RO)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 6626/2025','Institui o Programa Nacional de Ampliação do Acesso à Cirurgia Bariátrica e Metabólica no SUS, com participação complementar de hospitais e clínicas privadas.','Vanderlan Alves (UNIÃO-CE)','Rogéria Santos (REPUBLIC-BA)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 6653/2025','Altera a Lei Orgânica da Saúde para incorporar a perspectiva da equidade racial na saúde pública.','Amom Mandel (CIDADANIA-AM)','Rogéria Santos (REPUBLIC-BA)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 6976/2025','Torna obrigatório o exame de triagem auditiva neonatal (teste da orelhinha) em todos os recém-nascidos.','Duda Ramos (MDB-RR)','Amom Mandel (REPUBLIC-AM)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 969/2026','Altera a Lei nº 11.664/2008 para fortalecer a prevenção, o rastreamento, o diagnóstico precoce e o monitoramento do câncer de colo do útero.','Fausto Jr. (UNIÃO-AM)','Carla Dickson (PL-RN)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 978/2026','Institui a Política Nacional de Promoção da Saúde Visual na Infância e Adolescência.','Renilce Nicodemos (MDB-PA)','Carla Dickson (PL-RN)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 1624/2026','Institui a Política Nacional de Cuidado Integral às Pessoas com Deficiência Acometidas por Doenças Crônicas Acolhidas em Residências Inclusivas.','Laura Carneiro (PSD-RJ)','Rogéria Santos (REPUBLIC-BA)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 2582/2026','Altera a Lei nº 12.764/2012 para garantir transparência e acesso à informação sobre a oferta de serviços terapêuticos para pessoas com TEA no SUS.','Ivoneide Caetano (PT-BA)','Geraldo Resende (UNIÃO-MS)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 4732/2025','Institui a Política Nacional de Atenção em Oftalmologia no âmbito do SUS.','Aline Gurgel (REPUBLIC-AP)','Carla Dickson (PL-RN)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 4773/2025','Altera a Lei nº 14.768/2023 para atualizar a definição de deficiência auditiva conforme as diretrizes internacionais.','Rafael Prudente (MDB-DF)','Rogéria Santos (REPUBLIC-BA)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 2989/2025','Estabelece diretrizes para priorizar recursos federais em saúde mental nos estados com baixa cobertura de serviços psicossociais e incentiva a interiorização de profissionais.','Duda Ramos (MDB-RR)','Silvia Cristina (PP-RO)','acomp'),
+      I('camara','9h30',L_CSAUDE,DELIB,'PL 4904/2025','Institui o Sistema Nacional de Informações sobre Transtornos do Neurodesenvolvimento (SINATNEURO) e o PROMAP-Neuro.','Sergio Souza (MDB-PR)','Carla Dickson (PL-RN)','acomp'),
+      I('senado','10h','Comissão de Ciência, Tecnologia, Inovação e Informática (Senado) · Anexo II, Ala Senador Alexandre Costa, Plenário nº 7',DELIB,'PL 4465/2021','Dispõe sobre incentivos à inovação e à pesquisa científica e tecnológica no setor de saúde, com vistas à sua capacitação produtiva e tecnológica.','Senador Alessandro Vieira (MDB-SE)','Senador Izalci Lucas','acomp'),
+      I('senado','10h','Comissão de Assuntos Econômicos (Senado) · Anexo II, Ala Senador Alexandre Costa, Plenário nº 19',DELIB,'PL 675/2022','Altera a Lei nº 8.212/1991 para dispor sobre a contribuição previdenciária de estudantes bolsistas das entidades federais de ensino.','Senadora Eliziane Gama (CIDADANIA-MA)','Senador Plínio Valério (PSDB-AM)','acomp'),
+      I('camara','10h','Comissão de Ciência, Tecnologia e Inovação (Câmara) · Anexo II, Plenário 13',DELIB,'PL 3265/2025','Institui a Política Nacional de Monitoramento e Cuidado Integral à Pessoa com Diabetes Melito Tipo 1 no âmbito do SUS. Apensado: PL 979/2026.','Renata Abreu (PODE-SP)','Dr. Zacharias Calil (MDB-GO)','fav',{destaque:true,posTxt:'Parecer do relator, 4º vice-presidente da FPMed, Dep. Dr. Zacharias Calil (MDB-GO), pela aprovação do PL 3265/25 e do PL 979/26, apensado, com substitutivo.'}),
+      I('camara','10h',L_CFT,DELIB,'PL 1069/2021','Dispõe sobre a obrigatoriedade de usinas geradoras de oxigênio medicinal nos estabelecimentos de saúde hospitalares e de internação.','José Ricardo (PT/AM), Alexandre Padilha (PT/SP), Célio Moura (PT/TO) e outros','Ana Pimentel (PT-MG)','acomp'),
+      I('camara','10h',L_CFT,DELIB,'PL 5422/2013','Acrescenta §§ 9º e 10 ao art. 15 da Lei nº 8.666/1993 para que bens adquiridos para o SUS sejam identificados de forma a impedir desvios e comercialização indevida.','Senado Federal (Vanessa Grazziotin)','Laura Carneiro (PSD-RJ)','acomp'),
+      I('senado','11h','Comissão de Direitos Humanos e Legislação Participativa (Senado) · Anexo II, Ala Senador Nilo Coelho, Plenário nº 6',DELIB,'PL 501/2023','Altera o Estatuto da Criança e do Adolescente para tipificar o crime de submissão de criança ou adolescente a intervenção cirúrgica ou a tratamento de transexualização.','Senador Magno Malta (PL/ES)','Senador Jorge Seif (PL-SC)','acomp'),
+      I('senado','11h','Comissão de Direitos Humanos e Legislação Participativa (Senado) · Anexo II, Ala Senador Nilo Coelho, Plenário nº 6',DELIB,'REQ 130/2026','Requer audiência pública, em conjunto com a Comissão de Assuntos Sociais, sobre a desjudicialização da saúde e a resolução administrativa das demandas de acesso a medicamentos e procedimentos de pessoas com doenças raras e ultrarraras.','Senadora Damares Alves (REPUBLICANOS/DF)',null,'acomp'),
+      I('senado','11h','Comissão de Direitos Humanos e Legislação Participativa (Senado) · Anexo II, Ala Senador Nilo Coelho, Plenário nº 6',DELIB,'REQ 133/2026','Requer audiência pública para debater as restrições impostas pela Anvisa ao uso compassivo da polilaminina e seus impactos sobre o direito à saúde de pacientes com lesão medular grave.','Senador Magno Malta (PL/ES)',null,'acomp'),
+      I('camara','10h30',L_CCJC,DELIB,'PL 244/2019','Cria o Fundo Nacional de Combate ao Câncer e de Assistência a Portadores (FNCCAP).','Pedro Lucas Fernandes (PTB-MA)','Átila Lira (PP-PI)','acomp'),
+      I('camara','10h30',L_CCJC,DELIB,'PL 1667/2025','Institui o Dia Nacional de Conscientização sobre a Síndrome de Alagille, em 24 de janeiro.','Duarte Jr. (PSB-MA)','Lucas Redecker (PSD-RS)','acomp'),
+      I('camara','10h30',L_CCJC,DELIB,'PL 334/2026','Altera a Lei nº 11.736/2008 para instituir o cordão de fita roxa como símbolo da doença de Alzheimer.','Laura Carneiro (PSD-RJ)','Maria Arraes (PSB-PE)','acomp'),
+      I('camara','10h30',L_CCJC,DELIB,'PL 1752/2022','Altera a Lei Brasileira de Inclusão para permitir a entrada e permanência, em estabelecimentos de saúde, de tradutor e intérprete de Libras que acompanhe pessoa surda ou com deficiência auditiva.','Carmen Zanotto (CIDADANIA-SC)','Roberto Duarte (REPUBLIC-AC)','acomp'),
+      I('camara','10h30',L_CCJC,DELIB,'PL 6019/2023','Institui o dia 6 de março como Dia Nacional de Conscientização do Linfedema.','Rosana Valle (PL-SP)','Chris Tonietto (PL-RJ)','acomp'),
+      I('camara','10h30',L_CCJC,DELIB,'PL 2680/2024','Altera a Lei nº 10.216/2001 para incluir o Disque Saúde Mental.','Ossesio Silva (REPUBLIC-PE)','Julio Cesar Ribeiro (REPUBLIC-DF)','acomp'),
+      I('camara','10h30',L_CCJC,DELIB,'PL 4282/2025','Institui a Política Nacional Integrada da Primeira Infância (PNIPI) no âmbito da União.','Laura Carneiro (PSD-RJ)','Maria Arraes (PSB-PE)','acomp'),
+      I('senado','14h',L_CTFC,DELIB,'REQ 34/2026 CTFC','Requer audiência pública, em conjunto com a Comissão de Assuntos Sociais, para debater a crescente precarização do trabalho médico no Brasil.','Senador Dr. Hiran (PP/RR)',null,'fav',{destaque:true}),
+      I('camara','14h',L_CPASIAF,DELIB,'PL 2373/2023','Dispõe sobre a Violência Obstétrica e Ginecológica na assistência à saúde da mulher nos serviços públicos e privados de saúde. Síntese do substitutivo: estabelece diretrizes para a assistência materna e neonatal, atribui aos gestores responsabilidades sobre a estrutura e o funcionamento dos serviços e resguarda a decisão médica fundamentada em critérios clínicos, científicos e éticos.','Laura Carneiro (PSD-RJ)','Rogéria Santos (REPUBLIC-BA)','acomp',{destaque:true,posTxt:'acompanhar a deliberação e defender a preservação dos ajustes alinhados ao CFM.'}),
+      I('camara','14h',L_CPASIAF,DELIB,'PL 2965/2021','Altera a Lei nº 9.656/1998 para equiparar a filho do titular de plano de saúde o enteado e o menor tutelado ou sob guarda judicial, e a Lei nº 8.213/1991 para promover equiparação análoga no RGPS.','Senado Federal (Daniella Ribeiro)','Laura Carneiro (PSD-RJ)','acomp'),
+      I('camara','14h','Comissão de Direitos Humanos, Minorias e Igualdade Racial (Câmara) · Anexo II, Plenário 9',DELIB,'PL 130/2025','Institui a Política Nacional de Saúde Mental para Pessoas Trans e Travestis e autoriza ambulatórios de atendimento multidisciplinar em todas as capitais.','Erika Hilton (PSOL-SP)','Daiana Santos (PCdoB-RS)','acomp'),
+      I('camara','14h','Comissão de Defesa dos Direitos da Mulher (Câmara) · Anexo II, Plenário 14',DELIB,'PL 1379/2025','Institui a Carteira de Identificação da Pessoa com Adenomiose (CIPAD).','Dayany Bittencourt (UNIÃO-CE)','Maria Arraes (PSB-PE)','acomp'),
+      I('camara','14h','Comissão de Defesa dos Direitos da Mulher (Câmara) · Anexo II, Plenário 14',DELIB,'PL 1035/2025','Institui a Política Nacional de Prevenção e Tratamento da Depressão e Outros Transtornos Mentais, o Vale Saúde Mental para Trabalhadores e o Programa de Apoio à Saúde Mental da Mulher Pós-Parto.','Renata Abreu (PODE-SP)','Erika Kokay (PT-DF)','acomp'),
+      I('camara','14h','Comissão de Defesa dos Direitos da Mulher (Câmara) · Anexo II, Plenário 14',DELIB,'PL 2403/2025','Institui a Política Nacional de Assistência às Pessoas com Endometriose.','Duda Ramos (MDB-RR)','Erika Hilton (PSOL-SP)','acomp'),
+      I('camara','14h','Comissão de Legislação Participativa (Câmara) · Anexo II, Plenário 03',DELIB,'REQ 73/2026 CLP','Requer moção de pesar pelo falecimento do médico Dr. José Luiz Dantas Mestrinho, expoente da defesa da medicina no Brasil.','Dr. Frederico (PL-MG)',null,'fav',{destaque:true,nota:'A FPMed recebe com muita felicidade a homenagem promovida pelo Dep. Dr. Frederico, membro atuante e parceiro da Frente.'}),
+      I('senado','Após a reunião das 14h',L_CTFC,'Audiência pública','Precarização do trabalho médico','Debater a crescente ocorrência de fraudes em contratos administrativos celebrados com cooperativas e Organizações Sociais na área da saúde, a intermediação dos serviços de saúde, a precarização das relações de trabalho de todos os profissionais da saúde, o desvirtuamento do regime cooperativista, a fragilidade da fiscalização contratual e os riscos assistenciais e financeiros daí decorrentes, assim como a crescente precarização do trabalho médico no Brasil.','Senador Dr. Hiran (PP/RR)',null,'acomp',{destaque:true,posTxt:'acompanhar ativamente a audiência, considerando a participação prevista de representantes de entidades associadas ao IBDM e a relevância do tema para a categoria médica.',nota:'Convidados: representante do Ministério da Saúde; Antônio França da Costa (AudSaúde/TCU); representante da CGU; Luis Alves de Freitas Lima (Superintendência do Trabalho e Emprego no Ceará); Raphael Câmara (CFM); Edmar Fernandes de Araújo Filho (FENAM); Levi Costa Carioca (SIMEC); Luis Paleare (AEMED-BR); representante do Dr. Felipe Vasconcelos (SIMERS); Naira Venezia Portela Schmidt (MTE). Ausência confirmada: representante da Organização Internacional do Trabalho.'})
+    ]},
+    {id:'qui', nome:'Quinta-feira', data:'05/11', rotulo:'Sem itens', vazioPrevia:'Sem itens de interesse em pauta.', itens:[]},
+    {id:'sex', nome:'Sexta-feira', data:'06/11', rotulo:'Sem itens', vazioPrevia:'Sem itens de interesse em pauta.', itens:[]}
+  ]
+};
+SEMANAS.push(W2630, W0206);
 SEMANAS.sort((a,b)=>b.id.localeCompare(a.id));
 
 const INFORMES = [
@@ -505,12 +707,16 @@ const INFORMES = [
 /* vinculo: 'membro' | 'citado'. Complete esta lista para preencher a aba. */
 const MEMBROS = [
   {nome:'Dr. Hiran Gonçalves', casa:'Senado', partido:'PP', uf:'RR', vinculo:'membro', cargo:'Presidente da FPMed', papel:'Autor da Sessão Especial do Dia do Médico e da Emenda nº 60 à PEC 18/2025. Relator do PL 3.941/2025 na CAS.'},
+  {nome:'Dr. Zacharias Calil', casa:'Câmara', partido:'MDB', uf:'GO', vinculo:'membro', cargo:'4º vice-presidente da FPMed', papel:'Relator do PL 3265/2025 (diabetes tipo 1) na Comissão de Ciência, Tecnologia e Inovação, com parecer favorável.'},
+  {nome:'Dr. Frederico', casa:'Câmara', partido:'PL', uf:'MG', vinculo:'membro', papel:'Membro atuante e parceiro da Frente. Autor do REQ 73/2026 (moção de pesar pelo Dr. José Luiz Dantas Mestrinho) e do REQ 193/2026 CSAUDE.'},
   {nome:'Doutor Luizinho', casa:'Câmara', partido:'PP', uf:'RJ', vinculo:'citado', papel:'Relator da MPV 1370/2026 (ENAMED)'},
   {nome:'Tereza Cristina', casa:'Senado', partido:'PP', uf:'MS', vinculo:'citado', papel:'Discursou na Sessão Especial do Dia do Médico'},
   {nome:'Rogério Carvalho', casa:'Senado', partido:'PT', uf:'SE', vinculo:'citado', papel:'Autor do PL 3.941/2025 e relator da PEC 18/2025 na CCJ'},
   {nome:'Laura Carneiro', casa:'Câmara', partido:'PSD', uf:'RJ', vinculo:'citado', papel:'Relatora do PL 5538/2019 (epilepsia)'},
   {nome:'Merlong Solano', casa:'Câmara', partido:'PT', uf:'PI', vinculo:'citado', papel:'Relator dos PLs 665/2011 e 5265/2013 na CFT'},
   {nome:'Heloísa Helena', casa:'Câmara', partido:'REDE', uf:'RJ', vinculo:'citado', papel:'Autora do PL 3026/2026 (PJ em atividades-fim)'},
+  {nome:'Rogéria Santos', casa:'Câmara', partido:'REPUBLICANOS', uf:'BA', vinculo:'citado', papel:'Relatora do PL 2.373/2023 (violência obstétrica) na Comissão de Previdência'},
+  {nome:'Flávia Morais', casa:'Câmara', partido:'MDB', uf:'GO', vinculo:'citado', papel:'Presidiu a audiência sobre avaliação biopsicossocial no diabetes tipo 1 na Comissão de Saúde'},
   {nome:'Sidney Leite', casa:'Câmara', partido:'PSD', uf:'AM', vinculo:'citado', papel:'Relator do PL 5641/2016 (repasses do SUS)'}
 ];
 
@@ -554,19 +760,29 @@ const semanaAtual = () => SEMANAS.find(s=>s.id===state.semana);
 const visivel = (it, modo) => !it.modo || it.modo===modo;
 
 function itemHTML(it, modo){
-  const syn = modo==='sintese';
-  const meta = [['Autoria', it.autoria],['Relatoria', it.relatoria],['Local', it.local]].filter(m=>m[1]).map(m=>`<div><dt>${m[0]}</dt><dd>${m[1]}</dd></div>`).join('');
-  const pos = it.pos ? `<div class="pos"><b>Posição FPMed</b>${pill(it.pos==='fav'?'fav':'acomp', POS[it.pos])}${it.posTxt?`<span>${it.posTxt}</span>`:''}</div>` : '';
-  const res = syn && it.resultado ? `<div class="res ${it.status}"><b>Resultado · ${STATUS[it.status]}</b>${it.resultado}</div>` : '';
-  const nota = it.nota ? `<div class="nota">${it.nota}</div>` : (!syn && it.notaPrevia ? `<div class="nota">${it.notaPrevia}</div>` : '');
+  const syn = modo==='sintese', res = syn || it.mostraRes;
+  const meta = [['Autoria', it.autoria],['Relatoria', it.relatoria]].filter(m=>m[1]).map(m=>`<div><dt>${m[0]}</dt><dd>${m[1]}</dd></div>`).join('');
+  const pos = it.pos ? `<div class="pos"><b>Posição FPMed</b>${pill(POSCLS[it.pos], POS[it.pos])}${it.posTxt?`<span>${it.posTxt}</span>`:''}</div>` : '';
+  const notas = [it.nota, syn ? it.notaSintese : it.notaPrevia].filter(Boolean).map(n=>`<div class="nota">${n}</div>`).join('');
+  const rs = res && it.resultado ? `<div class="res ${it.status}"><b>Resultado · ${STATUS[it.status]}</b>${it.resultado}</div>` : '';
   return `<article class="it">
-    <div class="it-time"><b>${it.hora||'—'}</b><span>${CASA[it.casa]}</span></div>
-    <div>
-      <div class="it-top"><span class="tag casa">${it.tipo}</span>${syn&&it.status?pill(it.status,STATUS[it.status]):''}</div>
-      <h4>${it.sigla}</h4>
-      <p class="ementa">${it.ementa}</p>
-      <dl class="meta">${meta}</dl>${pos}${nota}${res}
-    </div></article>`;
+    <div class="it-top"><h4>${it.sigla}</h4>${res&&it.status?pill(it.status,STATUS[it.status]):''}</div>
+    <p class="ementa">${it.ementa}</p>
+    ${meta?`<dl class="meta">${meta}</dl>`:''}${pos}${notas}${rs}</article>`;
+}
+function grupos(itens){
+  const out = [];
+  itens.forEach(it=>{
+    const k = [it.hora,it.local,it.tipo,it.casa].join('|');
+    let g = out.find(x=>x.k===k);
+    if(!g){ g = {k, it, itens:[]}; out.push(g); }
+    g.itens.push(it);
+  });
+  return out;
+}
+function grupoHTML(g, modo){
+  const it = g.it;
+  return `<section class="grp"><header class="grp-h"><b>${it.hora||'—'}</b><span class="tag casa">${CASA[it.casa]}</span><span class="grp-l">${it.local}</span><span class="tag">${it.tipo}</span></header>${g.itens.map(i=>itemHTML(i,modo)).join('')}</section>`;
 }
 
 function renderWeeks(){
@@ -603,19 +819,22 @@ function renderAgenda(){
       if(filtrando && !itens.length) return '';
       let corpo;
       if(dia.feriado) corpo = `<div class="off-msg">${dia.feriado}</div>`;
-      else if(!itens.length) corpo = `<div class="off-msg">${!syn && dia.vazioPrevia ? dia.vazioPrevia : 'Nenhum item nesta visão.'}</div>`;
-      else corpo = itens.map(it=>itemHTML(it, state.modo)).join('');
+      else if(!itens.length) corpo = `<div class="off-msg">${dia.vazioPrevia || 'Nenhum item nesta visão.'}</div>`;
+      else corpo = grupos(itens).map(g=>grupoHTML(g, state.modo)).join('');
       const rot = (!syn && dia.rotuloPrevia) || dia.rotulo;
-      return `<section class="dia" id="dia-${dia.id}"><div class="dia-h"><h3>${dia.nome}</h3><small>${dia.data}/2026</small><span class="tag fl">${rot}</span></div>${corpo}</section>`;
+      return `<section class="dia" id="dia-${dia.id}"><div class="dia-h"><h3>${dia.nome}</h3><small>${dia.data}/2026${itens.length>1?` · ${itens.length} itens`:''}</small><span class="tag fl">${rot}</span></div>${corpo}</section>`;
     }).join('');
   $('#ag-body').innerHTML = html;
   if(filtrando && !dias.some(x=>x.itens.length)) $('#ag-body').innerHTML = '<div class="vazio">Nenhum item de interesse nesta semana com esses filtros.</div>';
 }
 
 /* ---------- início ---------- */
+function destCard(d){
+  return `<article class="card"><div class="tag casa">${d.meta}</div><h3>${d.t}</h3><p class="t">${d.p}</p><div class="foot">${pill(d.st, d.lab || (d.st==='ok'?'Aprovado':'Realizado'))}</div></article>`;
+}
 function renderHome(){
   /* Tudo aqui vem dos dados: a semana mais recente de SEMANAS (ordenadas por id) aparece sozinha. */
-  const atual = SEMANAS[0], sin = SEMANAS.find(x=>x.sintese);
+  const atual = SEMANAS[0], sin = SEMANAS.find(x=>x.sintese && x.sintese.destaques);
   const modo = atual.sintese ? 'sintese' : 'previa', doc = atual.sintese || atual.previa;
   $('#h-week').textContent = `Semana de ${atual.titulo}`;
   $('#h-week-link').onclick = () => { state.semana = atual.id; state.modo = modo; renderWeeks(); renderAgenda(); location.hash = 'agendas'; };
@@ -626,26 +845,34 @@ function renderHome(){
     <div class="foot">${atual.sintese?pill('ok','Síntese publicada'):pill('neutral','Síntese em breve')}<a class="link" href="${atual.sintese?atual.pdfSintese:atual.pdfAgenda}" target="_blank" rel="noopener">Abrir PDF →</a></div>`;
   $('#home-week').innerHTML = atual.dias.map(dia=>{
     const itens = dia.itens.filter(it=>visivel(it,modo));
+    const n = itens.length;
     const lab = dia.feriado ? 'Feriado nacional' : ((modo==='previa' && dia.rotuloPrevia) || dia.rotulo);
-    return `<button type="button" class="day ${dia.feriado||!itens.length?'off':''}" data-go="agendas" data-semana="${atual.id}" data-dia="${dia.id}" aria-label="${dia.nome}, ${dia.data}: ${lab}">
+    return `<button type="button" class="day ${dia.feriado||!n?'off':''}" data-go="agendas" data-semana="${atual.id}" data-dia="${dia.id}" aria-label="${dia.nome}, ${dia.data}: ${lab}">
       <span class="dn">${dia.nome.replace('-feira','')}</span>
       <span class="dd">${dia.data.split('/')[0]}<small>/${dia.data.split('/')[1]}</small></span>
-      <span class="dl">${lab}</span>
-      <span class="dots">${itens.map(it=>`<i class="dot ${modo==='sintese'?(it.status||''):''}"></i>`).join('')}</span>
+      <span class="dl">${lab}${n?` · ${n} ${n===1?'item':'itens'}`:''}</span>
+      <span class="dots">${itens.slice(0,10).map(it=>`<i class="dot ${modo==='sintese'?(it.status||''):''}"></i>`).join('')}${n>10?`<small>+${n-10}</small>`:''}</span>
     </button>`; }).join('');
   $('#home-legend').innerHTML = modo==='sintese'
-    ? '<span><i class="dot ok"></i>Aprovado</span><span><i class="dot info"></i>Realizado ou em andamento</span><span><i class="dot ret"></i>Cancelado ou retirado de pauta</span>'
+    ? '<span><i class="dot ok"></i>Aprovado</span><span><i class="dot info"></i>Realizado ou em andamento</span><span><i class="dot ret"></i>Cancelado, retirado ou não deliberado</span>'
     : '<span><i class="dot"></i>Item em pauta</span><span>Os resultados entram quando a síntese da semana for publicada.</span>';
 
-  const sd = sin && sin.sintese, temSin = !!(sd && sd.destaques);
-  $('#sec-destaques').hidden = !temSin;
+  const da = doc.destaques;
+  $('#sec-dest-atual').hidden = !da;
+  if(da){
+    $('#h-dest-atual').textContent = atual.sintese ? 'Destaques da síntese' : 'Destaques da agenda';
+    $('#home-dest-atual-sub').textContent = atual.titulo;
+    $('#home-dest-atual').innerHTML = da.map(destCard).join('');
+  }
   const nums = (atual.sintese && atual.sintese.numeros) || doc.contagem;
   $('#home-num-sub').textContent = `Fonte: ${atual.sintese?'Síntese':'Agenda'} FPMed, ${atual.titulo}`;
   $('#home-stats').innerHTML = nums.map(n=>`<div class="stat"><b>${n[0]}</b><span>${n[1]}</span></div>`).join('');
-  if(temSin){
-    const rotulo = sin.id===atual.id ? '' : 'Última síntese publicada: ';
-    $('#home-dest-sub').textContent = rotulo + sin.titulo;
-    $('#home-dest').innerHTML = sd.destaques.map(d=>`<article class="card"><div class="tag casa">${d.meta}</div><h3>${d.t}</h3><p class="t">${d.p}</p><div class="foot">${pill(d.st, d.st==='ok'?'Aprovado':'Realizado')}</div></article>`).join('');
+
+  const showSin = !!(sin && sin.id!==atual.id);
+  $('#sec-destaques').hidden = !showSin;
+  if(showSin){
+    $('#home-dest-sub').textContent = 'Última síntese publicada: ' + sin.titulo;
+    $('#home-dest').innerHTML = sin.sintese.destaques.map(destCard).join('');
   }
   $('#home-inf').innerHTML = [...INFORMES].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,2).map(infCard).join('');
 }
@@ -694,7 +921,7 @@ function renderMembros(){
     <div class="av" aria-hidden="true">${initials(m.nome)}</div>
     <div style="min-width:0"><h3>${m.nome}</h3><div class="pt">${m.casa==='Senado'?'Sen.':'Dep.'} · ${m.partido}/${m.uf}</div>
     <div class="ro">${m.cargo?`<b>${m.cargo}.</b> `:''}${m.papel}</div>
-    ${m.vinculo==='membro'?pill('ok',m.cargo?'Presidência':'Membro'):pill('neutral','Citado nos materiais')}</div></button>`).join('')
+    ${m.vinculo==='membro'?pill('ok',m.cargo?(/^Presidente/.test(m.cargo)?'Presidência':'Diretoria'):'Membro'):pill('neutral','Citado nos materiais')}</div></button>`).join('')
     : '<div class="vazio" style="grid-column:1/-1">Nenhum parlamentar com esses filtros.</div>';
   $$('#mem-grid .mem').forEach(b=>b.onclick=()=>openPerfil(+b.dataset.n));
 }
