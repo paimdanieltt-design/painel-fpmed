@@ -395,7 +395,7 @@ body{margin:0}[hidden]{display:none!important}img{max-width:100%}
   <div class="hero sm"><div class="wrap">
     <div class="eyebrow">Quem compõe a Frente</div>
     <h1>Membros da Frente</h1>
-    <p>Parlamentares da FPMed e outros nomes que aparecem nos materiais publicados.</p>
+    <p>Deputados e senadores que integram a Frente Parlamentar Mista da Medicina.</p>
   </div></div>
   <main class="wrap">
     <div id="mem-lista">
@@ -403,14 +403,13 @@ body{margin:0}[hidden]{display:none!important}img{max-width:100%}
       <div class="mapa-svg"><svg id="br-map" viewBox="0 0 613 639" role="img" aria-label="Mapa do Brasil com a quantidade de membros da Frente em cada estado"></svg><div class="tip" id="br-tip" hidden></div></div>
       <div class="mapa-info" id="br-info"></div>
     </section>
-    <p class="fonte">Lista oficial da Frente, conforme a página da FPMed na Câmara dos Deputados (consulta em 05/11/2026). Partido e estado dos senadores conferidos no Senado Federal. Quem aparece só como citado nos materiais não integra a contagem.</p>
+    <p class="fonte">Lista oficial da Frente, conforme a página da FPMed na Câmara dos Deputados (consulta em 05/11/2026). Partido e estado dos senadores conferidos no Senado Federal.</p>
     <div class="ctrls">
       <input class="search" id="mem-q" type="search" placeholder="Buscar por nome" aria-label="Buscar parlamentar">
       <select class="search" id="mem-casa" aria-label="Casa"><option value="">Câmara e Senado</option><option>Câmara</option><option>Senado</option></select>
       <select class="search" id="mem-partido" aria-label="Partido"></select>
       <select class="search" id="mem-uf" aria-label="UF"></select>
     </div>
-    <div class="chips" id="mem-tipo" role="group" aria-label="Vínculo" style="margin-bottom:18px"></div>
     <p class="cont" id="mem-cont" aria-live="polite"></p>
     <div class="grid" id="mem-grid"></div>
     <div class="mais" id="mem-mais"></div>
@@ -776,7 +775,7 @@ const MEMBROS = (() => {
     if(d) usados.add(di);
     return Object.assign({nome: d ? d.nome : nome, casa: c==='S' ? 'Senado' : 'Câmara', partido, uf, vinculo:'membro'}, d ? {cargo:d.cargo, papel:d.papel} : {});
   });
-  return base.concat(DETALHES.filter((d,i)=>!usados.has(i) && d.vinculo!=='membro'));
+  return base;
 })();
 
 /* ---------- utilidades ---------- */
@@ -1068,7 +1067,6 @@ $('#m-sintese').onclick = ()=>{state.modo='sintese'; renderAgenda();};
 $('#ag-q').oninput = e=>{state.q=e.target.value; renderAgenda();};
 chipGroup($('#inf-casa'), [['todas','Todos'],['camara','Câmara'],['senado','Senado']], 'todas', v=>{infState.casa=v; renderInformes();});
 $('#inf-q').oninput = e=>{infState.q=e.target.value; renderInformes();};
-chipGroup($('#mem-tipo'), [['todos','Todos'],['membro','Membros'],['citado','Citados nos materiais']], 'todos', v=>{memState.tipo=v; renderMembros();});
 fillSelect($('#mem-partido'),'Todos os partidos',MEMBROS.map(m=>m.partido));
 fillSelect($('#mem-uf'),'Todas as UFs',BR_MAP.locations.map(l=>l.id.toUpperCase()));
 $('#mem-q').oninput = e=>{memState.q=e.target.value; renderMembros();};
