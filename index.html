@@ -218,12 +218,13 @@ select.search{flex:0 0 auto;cursor:pointer}
 @media (max-width:760px){.mapa{grid-template-columns:1fr;padding:16px}}
 .mapa-svg{position:relative;max-width:460px;width:100%;margin:0 auto}
 .mapa-svg svg{display:block;width:100%;height:auto}
-.uf{stroke:var(--surface);stroke-width:1;cursor:pointer}
-.uf:hover{stroke:var(--brand-deep);stroke-width:1.8}
-.uf:focus-visible{outline:none;stroke:var(--brand-deep);stroke-width:2.2}
-.uf.sel{stroke:var(--lime);stroke-width:3}
-.uf-l{font-size:9.5px;font-weight:700;fill:var(--fg);pointer-events:none;text-anchor:middle;dominant-baseline:central}
-.uf-l.on{fill:#fff}
+.mapa-svg svg{filter:drop-shadow(0 4px 8px rgba(7,71,97,.13))}
+.uf{stroke:#fff;stroke-width:1.1px;stroke-linejoin:round;vector-effect:non-scaling-stroke;cursor:pointer;transition:fill .15s}
+.uf:hover{stroke:var(--brand-deep);stroke-width:1.5px}
+.uf:focus-visible{outline:none;stroke:var(--brand-deep);stroke-width:2px}
+.uf.sel{stroke:var(--brand-deep);stroke-width:2px}
+.uf-l{font-size:9.5px;font-weight:700;fill:var(--fg);pointer-events:none;text-anchor:middle;dominant-baseline:central;stroke:#fff;stroke-width:2.6px;paint-order:stroke;stroke-linejoin:round;opacity:.9}
+.uf-l.on{fill:#fff;stroke:var(--brand);opacity:1}
 .tip{position:absolute;pointer-events:none;background:var(--fg);color:var(--bg);font-size:12px;font-weight:600;padding:6px 10px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-130%);z-index:3}
 .mapa-info h2{font-size:19px}
 .mapa-info .sub{color:var(--muted);font-size:13px;margin-top:4px}
@@ -971,10 +972,12 @@ function renderMapa(){
   const svg = $('#br-map');
   svg.innerHTML = BR_MAP.locations.map(l=>{
     const uf = l.id.toUpperCase(), n = c[uf]||0, pct = n ? 28 + 72*n/max : 0;
-    const fill = n ? `color-mix(in srgb, var(--brand) ${pct}%, var(--surface-2))` : 'var(--surface-2)';
+    const fill = n ? `color-mix(in srgb, var(--brand) ${pct}%, var(--surface-2))` : (memState.uf===uf ? 'color-mix(in srgb, var(--brand) 14%, var(--surface-2))' : 'var(--surface-2)');
     return `<path class="uf ${memState.uf===uf?'sel':''}" data-uf="${uf}" data-n="${n}" d="${l.path}" style="fill:${fill}" tabindex="0" role="button" aria-label="${l.name}: ${n} ${n===1?'membro':'membros'}"></path>`;
   }).join('') + '<g id="br-labels"></g>';
   const g = svg.querySelector('#br-labels');
+  const frente = p => svg.insertBefore(p, g);
+  const selp = svg.querySelector('.uf.sel'); if(selp) frente(selp);
   $$('.uf', svg).forEach(p=>{
     const b = p.getBBox(), uf = p.dataset.uf, n = +p.dataset.n;
     const t = document.createElementNS('http://www.w3.org/2000/svg','text');
@@ -982,6 +985,7 @@ function renderMapa(){
     t.setAttribute('class', 'uf-l' + (n && (28+72*n/max) > 55 ? ' on' : '')); t.textContent = uf; g.appendChild(t);
   });
   const tip = $('#br-tip');
+  svg.onmouseover = e => { const p = e.target.closest('.uf'); if(p && !p.classList.contains('sel')){ frente(p); const sp = svg.querySelector('.uf.sel'); if(sp) frente(sp); } };
   svg.onmousemove = e => {
     const p = e.target.closest('.uf'); if(!p){ tip.hidden = true; return; }
     const box = svg.parentElement.getBoundingClientRect(), n = +p.dataset.n;
